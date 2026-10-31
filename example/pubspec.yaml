@@ -1,0 +1,23 @@
+name: duo_rail_kit_example
+description: A runnable, offline example of system-directed and width-based navigation with Duo Rail Kit.
+publish_to: 'none'
+version: 0.1.0+1
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  duo_rail_kit:
+    path: ../
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pedantic_mono: ^1.38.1
+
+flutter:
+  uses-material-design: true
+  config:
+    enable-swift-package-manager: true

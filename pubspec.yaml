@@ -1,0 +1,39 @@
+name: duo_rail_kit
+description: Flutter layout helpers and an iOS plugin for system-directed side rails and safe-area spacing on iPhone Duo.
+version: 0.1.0
+repository: https://github.com/zawasystem/duo_rail_kit
+issue_tracker: https://github.com/zawasystem/duo_rail_kit/issues
+topics:
+  - adaptive-layout
+  - navigation
+  - foldable
+  - safe-area
+screenshots:
+  - description: Flutter-rendered example with simulated Duo landscape geometry and a right-hand rail.
+    path: doc/images/overview.png
+  - description: Flutter-rendered example with a simulated right-hand status column.
+    path: doc/images/duo-right.png
+  - description: Flutter-rendered example with a left-hand rail in simulated Split View geometry.
+    path: doc/images/split-left.png
+  - description: Flutter-rendered example using the phone-width bottom navigation fallback.
+    path: doc/images/phone.png
+publish_to: 'none'
+
+environment:
+  sdk: ^3.12.0
+  flutter: '>=3.47.8'
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  pedantic_mono: ^1.38.1
+
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: DuoRailKitPlugin

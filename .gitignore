@@ -1,0 +1,13 @@
+.DS_Store
+.dart_tool/
+.fvm/
+.flutter-plugins*
+.idea/
+*.iml
+build/
+coverage/
+pubspec.lock
+.build/
+.swiftpm/
+DerivedData/
+*.xcuserstate
