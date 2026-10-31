@@ -23,11 +23,14 @@ jobs only need their normal `flutter pub get` step. They do not need a separate
 package checkout, token, Git URL rewrite, or credential-bearing dependency URL.
 The consumer repository itself can remain private.
 
-The five consumer migration branches retain the original full SHA
-`3734976a179448c2fda790a33ef5fe8a53a7b288`. The package's
-`compat/initial-extraction` tag keeps that revision reachable after the package's
-`main` history was consolidated. Consumers do not follow `main` or the tag;
-updating their fixed SHA remains a separate reviewed change.
+The five consumer migration branches use `ref: '0.1.0'`, with
+`b21e358959c31e077f062ff4aa8d387c5e1ea764` as the lockfile's `resolved-ref`.
+They do not follow `main`. Published version tags stay fixed; selecting a newer
+release tag and updating its lockfile is a separate reviewed change.
+
+The temporary `compat/initial-extraction` tag was removed after these branches
+were validated and pushed. See [migration history](../MIGRATION.md) for the effect
+on historical consumer commits that still reference the original extraction.
 
 ## Dependabot
 
@@ -39,9 +42,10 @@ public Git dependency while updating other packages.
 
 ## Removing the former private-repository setup
 
-The consumer migration branches now remove `prepare-duo-rail-kit` from CI and
-both Android and iOS release jobs, together with its helper files and tests.
-Normal dependency resolution uses the unchanged HTTPS URL and SHA.
+The consumer migration branches no longer use `prepare-duo-rail-kit` in CI or
+Android/iOS release jobs. Its helper files and tests have also been removed.
+Normal dependency resolution uses the canonical HTTPS URL and the selected tag
+or commit recorded in the manifest and lockfile.
 
 `DUO_RAIL_KIT_APP_CLIENT_ID` and `DUO_RAIL_KIT_APP_PRIVATE_KEY` are no longer
 consumed by those workflows. If they were registered as Actions or Dependabot
@@ -58,9 +62,9 @@ for a consumer's private repository.
 
 ## Verification
 
-On 2026-11-01, both an anonymous HTTPS Git fetch and `flutter pub get` with an
-empty Pub cache resolved the original pinned SHA. The check disabled Git
-system/global configuration, credential helpers, and interactive prompting.
+On 2026-11-01, the `0.1.0` tag resolved to the SHA above through the README's
+installation example with an empty Pub cache. The check disabled Git system/global
+configuration, credential helpers, and interactive prompting.
 See the dated record in [publication preparation](publication.md).
 
 For future changes, verify that the selected tag or commit resolves to the

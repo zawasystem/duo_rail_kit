@@ -89,20 +89,21 @@ a later revision. Repeat release checks against the intended pub.dev revision.
 The README images are Flutter-rendered examples with simulated insets, not
 native device captures. They illustrate layout only.
 
-## Public Git access: 2026-11-01
+## Public Git access before the tag migration: 2026-11-01
 
 GitHub reports this repository as `PUBLIC`. With Git system/global configuration,
 credential helpers, and interactive prompting disabled, an HTTPS fetch resolved
 `3734976a179448c2fda790a33ef5fe8a53a7b288`. A separate Flutter host with an empty
 Pub cache also resolved that exact revision using the canonical HTTPS URL, and
 its generated lockfile recorded the same SHA. The
-`compat/initial-extraction` tag preserves that revision for existing consumers.
+`compat/initial-extraction` tag preserved that revision during migration.
 
-The five consumer migration branches now use ordinary `flutter pub get` in CI
-and Android/iOS release workflows. Their fixed dependency and lockfiles are
-unchanged. Package-only GitHub App steps and helpers are removed; authentication
-for signing and delivery remains. This verification does not constitute an app
-release, a pub.dev publication, or a successful remote consumer CI run.
+The five consumer migration branches switched to ordinary `flutter pub get` in CI
+and Android/iOS release workflows. Their fixed dependency and lockfiles were
+unchanged at that stage. Package-only GitHub App steps and helpers were removed;
+authentication for signing and delivery remained. This verification did not
+constitute an app release, a pub.dev publication, or a successful remote consumer
+CI run.
 
 Local checks after the documentation and CI-authentication updates passed:
 package and example analysis reported no issues, all 97 package tests and all
@@ -114,3 +115,41 @@ not changed by this update.
 GitHub private vulnerability reporting was checked separately and is disabled.
 [SECURITY.md](../SECURITY.md) describes this limitation; repository visibility does
 not establish a private reporting channel.
+
+## Release-tag migration and compatibility-tag removal: 2026-11-01
+
+The `0.1.0` tag remains fixed at
+`b21e358959c31e077f062ff4aa8d387c5e1ea764`. Its
+[hosted CI run](https://github.com/zawasystem/duo_rail_kit/actions/runs/41249515657)
+passed formatting, package/example analysis, and 97 + 10 tests. The manual native
+job was not run. An independent host using the README's Git dependency example
+resolved this exact tag and SHA with an empty Pub cache, Git credential helpers
+and system/global configuration disabled, and no interactive prompting.
+
+All five consumer migration branches now specify `ref: '0.1.0'` and record the
+same SHA in their lockfiles. Their only dependency change is this Git revision;
+the lockfile's Flutter minimum also becomes 3.47.8, matching the SDK already in
+use. Compared with the initial extraction, all changed Dart/Swift source lines
+within the package runtime (`lib/` and `ios/`) are standalone comments;
+executable code and `Package.swift` are unchanged.
+Dart package configuration and iOS plugin metadata were checked against the new
+Git cache revision.
+
+All 6,238 consumer tests passed, with three existing skips. Analysis passed for
+all maintained application code. One consumer's full-directory analysis also
+included three pre-existing informational diagnostics in an untracked preview
+file; that file was left unchanged, and its tracked code was checked separately.
+Application runtime code, app versions, signing, and workflow behavior were not
+changed. The migration branches were pushed, and their manifests and lockfiles
+were verified directly on GitHub before removing `compat/initial-extraction`.
+
+Remote CI was attempted for all five updated consumer branches. Every run was
+blocked before executing steps by the account's Actions budget. The consumer
+results above are local checks, not successful remote CI runs; billing settings
+were not changed.
+
+The compatibility tag is now removed. The published `0.1.0` tag is unchanged;
+subsequent documentation commits on `main` do not move it. Historical consumer
+commits that still pin the initial extraction SHA are no longer guaranteed to
+resolve from the public repository. This operation does not publish to pub.dev
+or release consumer applications.

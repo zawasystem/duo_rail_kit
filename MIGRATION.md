@@ -80,10 +80,18 @@ job with an explicit manual job on a GitHub-hosted macOS runner. Runtime code an
 the native contract remain unchanged by the packaging work. The [example](example/README.md) has its own iOS/Android hosts;
 its simulated previews demonstrate Flutter layout, not native device behavior.
 
-The GitHub repository is public as of 2026-11-01. Consumers can resolve their
-existing reviewed SHA over HTTPS without authentication. The
-`compat/initial-extraction` tag retains the original extraction revision for
-those consumers; rewriting `main` does not change their fixed dependency.
+The GitHub repository is public as of 2026-11-01. The five consumer migration
+branches now use the `0.1.0` release tag, with
+`b21e358959c31e077f062ff4aa8d387c5e1ea764` recorded in their lockfiles. HTTPS
+resolution requires no authentication. The release tag remains fixed at that
+commit; later documentation updates do not move it.
+
+The temporary `compat/initial-extraction` tag kept the original
+`3734976a179448c2fda790a33ef5fe8a53a7b288` revision reachable during migration.
+It was removed on 2026-11-01 after all five migration branches were validated
+and pushed with the release-tag dependency. Rebuilding historical consumer
+commits that still pin the old SHA is no longer guaranteed from the public
+repository. Use the migrated dependency and lockfile when rebuilding.
 
 Keep `publish_to: 'none'` until pub.dev publication is separately authorized.
 Follow [docs/publication.md](docs/publication.md) for SDK availability,
