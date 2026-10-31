@@ -45,11 +45,10 @@ dependencies:
 ```
 
 The HTTPS URL resolves without authentication on developer machines, in CI,
-and for Dependabot. No package-specific GitHub App, secret, or private repository
-access grant is needed. Commit the application's updated `pubspec.lock` so the
-tag's resolved commit is reviewable and reproducible. See
+and for Dependabot. Commit the application's updated `pubspec.lock` so the tag's
+resolved commit is reviewable and reproducible. See
 [Git dependency access](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/ci_authentication.md)
-for CI setup and removal of the former private-repository authentication.
+for CI setup and dependency verification.
 
 For local package development, replace the `git` entry with
 `path: ../duo_rail_kit`, adjusted for your directory layout.
@@ -274,21 +273,21 @@ if the required iOS 27.1 SDK is unavailable. Native jobs do not run automaticall
 on pushes or pull requests.
 
 A configured workflow does not establish a successful run: check its result for
-the commit being integrated. Dated verification results and remaining checks
-are recorded in the [publication checklist](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/publication.md).
+the commit being integrated. See the
+[publication checklist](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/publication.md)
+for release validation steps.
 
 Public pull requests must use an isolated hosted or ephemeral environment.
 Do not run untrusted pull-request code on a persistent self-hosted runner or
 expose credentials to it. Review runner access and SDK availability before
-enabling native jobs. Consumers' private repositories retain their own CI billing
-and access requirements; public package access does not change those settings.
+enabling native jobs.
 
 ## Contributing and release preparation
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for the development workflow,
-[MIGRATION.md](https://github.com/zawasystem/duo_rail_kit/blob/main/MIGRATION.md) for the extraction boundary and consumer migration,
-and [CHANGELOG.md](CHANGELOG.md) for package changes. Publication checks and the
-current validation record are in [docs/publication.md](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/publication.md).
+[MIGRATION.md](https://github.com/zawasystem/duo_rail_kit/blob/main/MIGRATION.md) for dependency migration,
+and [CHANGELOG.md](CHANGELOG.md) for package changes. Release checks are in
+[docs/publication.md](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/publication.md).
 
 Security reporting is described in [SECURITY.md](SECURITY.md).
 The package is licensed under the [MIT License](LICENSE). Flutter template and

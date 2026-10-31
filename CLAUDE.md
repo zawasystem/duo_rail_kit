@@ -1,7 +1,7 @@
 # duo_rail_kit maintenance
 
 This is an independent Flutter plugin. Read [README.md](README.md) for usage and
-behavioral constraints, [MIGRATION.md](MIGRATION.md) for extraction history, and
+behavioral constraints, [MIGRATION.md](MIGRATION.md) for dependency migration, and
 [docs/publication.md](docs/publication.md) for release preparation.
 
 - Use FVM for Flutter and Dart commands; `.fvmrc` pins the development SDK.
