@@ -11,10 +11,10 @@ on pub.dev; publishing there remains a separate step. See the
 
 ![Example layouts](doc/images/overview.png)
 
-*Flutter-rendered example with simulated insets; not native device captures.*
-[Right rail](doc/images/duo-right.png) ·
+*The example app on the iOS 27.2 Simulator: iPhone Duo inner display, with the rail in the system's right column.*
+[Outer display, right rail](doc/images/duo-right.png) ·
 [Left Split View rail](doc/images/split-left.png) ·
-[Phone layout](doc/images/phone.png)
+[iPhone 17, bottom bar](doc/images/phone.png)
 
 ## Requirements
 
@@ -86,9 +86,12 @@ fvm flutter run
 
 Its Layout, State, and About destinations demonstrate rail placement,
 safe areas, FAB positioning, and state preservation. Normal launches read the
-actual native edge and fall back to a 600-point width rule. The separate
-`DuoRailPreviewApp` fixture supplies simulated geometry for tests and the images
-above; it is not evidence of native event delivery. See
+actual native edge and fall back to a 600-point width rule. The images above are
+Simulator screenshots of this normal entry point; see
+[doc/images/README.md](doc/images/README.md) for how they were taken. They show
+the edge delivered by the Simulator, not behavior on physical hardware. The
+separate `DuoRailPreviewApp` fixture supplies simulated geometry for tests and
+local previews; it is not evidence of native event delivery. See
 [example/lib/app.dart](example/lib/app.dart) for the complete integration.
 
 ## API overview
@@ -290,5 +293,5 @@ and [CHANGELOG.md](CHANGELOG.md) for package changes. Release checks are in
 [docs/publication.md](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/publication.md).
 
 Security reporting is described in [SECURITY.md](SECURITY.md).
-The package is licensed under the [MIT License](LICENSE). Flutter template and
-rendered font/icon attributions are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+The package is licensed under the [MIT License](LICENSE). Flutter template, font,
+and icon attributions are in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

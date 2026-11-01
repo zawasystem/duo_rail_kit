@@ -9,13 +9,13 @@ topics:
   - foldable
   - safe-area
 screenshots:
-  - description: Flutter-rendered example with simulated Duo landscape geometry and a right-hand rail.
+  - description: Example app on the iOS 27.2 Simulator with the rail in the right system column of the iPhone Duo inner display.
     path: doc/images/overview.png
-  - description: Flutter-rendered example with a simulated right-hand status column.
+  - description: Example app on the iOS 27.2 Simulator with a right-hand rail on the iPhone Duo outer display.
     path: doc/images/duo-right.png
-  - description: Flutter-rendered example with a left-hand rail in simulated Split View geometry.
+  - description: Example app on the iOS 27.2 Simulator as the left Split View app on iPhone Duo, with a left-hand rail.
     path: doc/images/split-left.png
-  - description: Flutter-rendered example using the phone-width bottom navigation fallback.
+  - description: Example app on the iOS 27.2 Simulator using the width-based bottom navigation on iPhone 17.
     path: doc/images/phone.png
 publish_to: 'none'
 

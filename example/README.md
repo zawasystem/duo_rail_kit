@@ -43,8 +43,11 @@ notices.
 - **About** explains the integration order and layout rules.
 - The floating **+** adds a tap from any destination. Beside the system rail it
   uses `RailSideFab.locationOf` and sits 24 logical pixels above the content
-  bottom, including when the keyboard is open. The example keeps enough scroll
-  padding below its content to reach controls behind the floating action.
+  bottom, including when the keyboard is open. The scroll viewport stays inside
+  the safe area, so caret and focus reveals stay clear of the status bar, but the
+  content is painted past it and is not clipped at the status bar or home
+  indicator. Scroll padding keeps the last controls reachable behind the
+  floating action.
 
 `lib/main.dart` launches `DuoRailExampleApp`; the integration is in `lib/app.dart`.
 `VerticalBarEdge` wraps `SideStatusBarInsets` at the root. The shell uses
@@ -71,7 +74,7 @@ The tests cover live entry, 84-pixel columns on either physical edge, width
 fallbacks, state preservation when moving/removing the rail, RTL, enlarged text,
 and keyboard/FAB geometry. They do not replace native device testing.
 
-`DuoRailPreviewApp`, exported by `lib/main.dart`, is a documentation/test harness:
+`DuoRailPreviewApp`, exported by `lib/main.dart`, is a test and local preview harness:
 
 ```dart
 DuoRailPreviewApp(
@@ -88,3 +91,13 @@ preview displays **SIMULATED LAYOUT** and its label. It injects geometry into th
 same shell without querying the native channel; it is not an iOS emulator or
 evidence that native rotation, folding, or Split View events work. No simulated
 device switcher is exposed in the running app.
+
+`tool/render_screenshots.dart` renders four such previews into
+`build/simulated_previews/` (ignored by Git) for local layout checks:
+
+```sh
+fvm flutter test tool/render_screenshots.dart
+```
+
+The package README's images are Simulator screenshots of the normal entry point
+instead; see [doc/images/README.md](../doc/images/README.md).

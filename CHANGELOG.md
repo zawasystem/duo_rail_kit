@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- Example: the content is painted past the top and bottom safe areas instead of
+  being clipped below the status bar and above the home indicator. The scroll
+  viewport stays inside the safe area, so caret and focus reveals stay clear of
+  the status bar.
+- Documentation images are now iOS 27.2 Simulator screenshots of the example's
+  normal entry point: iPhone Duo outer and inner displays, the left Split View
+  app, and iPhone 17. The simulated preview renderer writes to
+  `example/build/simulated_previews/` instead of `doc/images/`.
+
 ## 0.1.0
 
 - Provide Flutter side-rail placement, safe-area spacing, stable content layout,

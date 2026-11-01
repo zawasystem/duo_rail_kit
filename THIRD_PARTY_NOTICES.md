@@ -40,12 +40,22 @@ ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 ```
 
-## Fonts used in documentation images
+## Fonts in documentation images and previews
 
-The renderer loads `Roboto-Regular.ttf` and `MaterialIcons-Regular.otf` from the
-selected Flutter SDK's `bin/cache/artifacts/material_fonts/`. It does not download
-replacement fonts or embed font files in the repository. The source files and
-license files checked for these notices are in the
+The images in `doc/images/` are iOS Simulator screenshots of the example app.
+Their text is drawn by iOS in its system font: the example requests a `Roboto`
+family that the app does not bundle, so iOS falls back to its own font. The
+status-bar elements and window corners are drawn by the Simulator. No Apple font
+files are included in this repository or the pub.dev archive.
+
+The app bundles only Flutter's `MaterialIcons-Regular.otf`
+(`uses-material-design: true`). The local preview renderer
+(`example/tool/render_screenshots.dart`) loads `Roboto-Regular.ttf` and
+`MaterialIcons-Regular.otf` from the selected Flutter SDK's
+`bin/cache/artifacts/material_fonts/` and writes its previews under
+`example/build/`, which is not committed. Neither path downloads replacement
+fonts or embeds font files in the repository. The source files and license files
+checked for these notices are in the
 [Flutter material-font artifact](https://storage.googleapis.com/flutter_infra_release/flutter/fonts/3012db47f3130e62f7cc0beabff968a33cbec8d8/fonts.zip),
 selected by the SDK's `bin/internal/material_fonts.version`.
 
@@ -56,9 +66,8 @@ selected by the SDK's `bin/internal/material_fonts.version`.
 - Source file: `Roboto-Regular.ttf`; accompanying license: `Roboto_LICENSE.txt`.
 - License: [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
-Roboto is used to render the example text in `doc/images/*.png`. The font file
-is unchanged and is not distributed here. The rendered UI uses the example's
-text, sizes, and colors.
+Roboto is used only by the local preview renderer. It does not appear in
+`doc/images/*.png`, and the font file is not distributed here.
 
 ### Material Icons — Creative Commons Attribution 4.0
 
@@ -71,7 +80,7 @@ text, sizes, and colors.
   with its [legal code](https://creativecommons.org/licenses/by/4.0/legalcode).
 
 Material Icons glyphs are rasterized, scaled, and colored within the example UI
-in `doc/images/*.png`. The font file and glyph outlines are not modified or
+captured in `doc/images/*.png`. The font file and glyph outlines are not modified or
 redistributed. The images' icon elements retain the supplied CC BY 4.0 terms;
 the package's MIT notice does not replace them. Neither Google nor the Flutter
 Authors endorse this package. The supplied license disclaims warranties; see

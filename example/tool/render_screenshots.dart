@@ -1,5 +1,6 @@
 // Run explicitly from example/: fvm flutter test tool/render_screenshots.dart
-// These are simulated widget renders, not native device screenshots.
+// Writes simulated widget renders to build/simulated_previews/ for local layout checks. They are not native
+// screenshots; the documentation images in doc/images/ are Simulator screenshots (see doc/images/README.md).
 import 'dart:convert';
 import 'dart:io';
 import 'dart:ui' as ui;
@@ -93,7 +94,7 @@ void main() {
         final rendered = await boundary.toImage(pixelRatio: 2);
         try {
           final bytes = await rendered.toByteData(format: ui.ImageByteFormat.png);
-          final file = File('../doc/images/${fixture.file}');
+          final file = File('build/simulated_previews/${fixture.file}');
           await file.parent.create(recursive: true);
           await file.writeAsBytes(bytes!.buffer.asUint8List());
         } finally {

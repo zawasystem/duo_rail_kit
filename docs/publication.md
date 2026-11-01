@@ -25,8 +25,9 @@ See [README limitations](../README.md#native-contract-and-limitations).
 Run package and example formatting, analysis, and tests, then build the iOS
 example and the disposable native host. Run the Android example build. Record
 commands, SDKs, the tested revision, and results; do not substitute results from
-an older revision for a changed release candidate. Documentation previews show
-Flutter layout only and do not replace native runtime checks.
+an older revision for a changed release candidate. The documentation images are
+Simulator screenshots and the local Flutter previews are simulated; neither
+replaces runtime checks on a device.
 
 The publishing dry run must run in an isolated staging copy with
 `publish_to: 'none'` removed only in that copy:
@@ -50,7 +51,7 @@ application files. Validate the README links and images from that file set.
   information when adding or changing published refs.
 - Review [third-party notices](../THIRD_PARTY_NOTICES.md) and the publish archive.
   MIT licensing of this package does not replace the Flutter template license or
-  the rendered font/icon terms. Check other dependency notices as well.
+  the font/icon terms for the documentation images. Check other dependency notices as well.
 - Verify the private reporting channel described in [SECURITY.md](../SECURITY.md).
   Repository visibility alone does not enable private vulnerability reporting.
 - Use isolated hosted or ephemeral runners for public contributions. Confirm
