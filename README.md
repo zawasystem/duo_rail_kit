@@ -291,6 +291,10 @@ Ubuntu. Native compilation is manual: dispatch the workflow from `main` with
 if the required iOS 27.1 SDK is unavailable. Native jobs do not run automatically
 on pushes or pull requests.
 
+The [publishing workflow](https://github.com/zawasystem/duo_rail_kit/blob/main/.github/workflows/publish.yml)
+validates stable version tags and publishes with GitHub OIDC after package and
+example checks pass. Native release checks remain a separate step.
+
 A configured workflow does not establish a successful run: check its result for
 the commit being integrated. See the
 [publication checklist](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/publication.md)

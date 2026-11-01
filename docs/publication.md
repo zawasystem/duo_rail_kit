@@ -70,6 +70,26 @@ Record the matching release commit and immutable tag. Keep existing Git
 consumers on their selected refs until their dependency source is deliberately
 updated and validated.
 
+## Automated publishing
+
+Version [0.1.1](https://pub.dev/packages/duo_rail_kit/versions/0.1.1) was published
+manually from [tag `0.1.1`](https://github.com/zawasystem/duo_rail_kit/releases/tag/0.1.1)
+(commit `fc3b2e09ad693bee0c075d0f9f41c61df7d621f9`) on 2026-11-01 and is managed
+by the `zawasystem.com` verified publisher. For later releases, the
+[publishing workflow](../.github/workflows/publish.yml) runs on stable version
+tags such as `0.1.2`. The tag must exactly match `pubspec.yaml`.
+
+Enable GitHub Actions publishing in the package's pub.dev Admin page with
+repository `zawasystem/duo_rail_kit` and tag pattern `{{version}}`. The workflow
+uses GitHub OIDC with a short-lived token; no stored publishing secret is needed.
+It runs package and example checks and a publication dry run before uploading.
+Push a release tag only after reviewing the release contents and authorizing
+publication. Do not move existing tags or push a test version to exercise CI.
+
+This Ubuntu workflow does not compile or run the native iOS plugin. Complete
+the applicable native checks above before creating a release tag, and verify
+the workflow result and published archive afterward.
+
 ## Repository and CI review
 
 - Review the entire public history, including published branches and tags, not

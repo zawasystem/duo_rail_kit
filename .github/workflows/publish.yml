@@ -1,0 +1,70 @@
+name: Publish to pub.dev
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-pub-dev-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    if: github.repository == 'zawasystem/duo_rail_kit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Verify release tag
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          import re
+
+          manifest = Path('pubspec.yaml').read_text()
+          versions = re.findall(r'^version:[^\r\n]*$', manifest, re.MULTILINE)
+          match = re.fullmatch(r"version:[ \t]*(['\"]?)([0-9]+\.[0-9]+\.[0-9]+)\1[ \t]*(?:#.*)?", versions[0]) if len(versions) == 1 else None
+          if match is None or match.group(2) != os.environ['RELEASE_TAG']:
+              raise SystemExit('Release tag must match the stable version in pubspec.yaml.')
+          if not re.search(r'^name: duo_rail_kit[ \t]*$', manifest, re.MULTILINE):
+              raise SystemExit('Unexpected package name.')
+          PY
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          flutter-version: 3.47.8
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Resolve example dependencies
+        working-directory: example
+        run: flutter pub get
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test example/lib example/test example/tool
+      - run: flutter analyze --no-pub
+      - run: flutter test --no-pub
+      - name: Analyze example
+        working-directory: example
+        run: flutter analyze --no-pub
+      - name: Test example
+        working-directory: example
+        run: flutter test --no-pub
+      - name: Validate publication archive
+        run: flutter pub publish --dry-run
+      # Obtain the short-lived credential only after validation has finished.
+      - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
+        with:
+          sdk: '3.13.7'
+      - name: Publish
+        run: flutter pub publish --force
