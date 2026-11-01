@@ -1,7 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.1.1
 
+- Prepare the plugin for its initial pub.dev release, with hosted-package
+  installation instructions and publication metadata.
+- Keep the public Dart API and native iOS implementation unchanged from 0.1.0.
 - Example: the content is painted past the top and bottom safe areas instead of
   being clipped below the status bar and above the home indicator. The scroll
   viewport stays inside the safe area, so caret and focus reveals stay clear of
@@ -22,8 +25,8 @@
 - Add hosted Flutter checks and an opt-in native build check using a disposable
   iOS host, with generated registration and compiled plugin symbol validation.
 - Include the MIT License, contributor and security reporting guidance, and a
-  publication checklist. The package is available through public Git hosting;
-  pub.dev publication remains disabled.
+  publication checklist. This version was distributed through public Git
+  hosting only; pub.dev publication was disabled.
 - Add a runnable iOS/Android example, simulated Flutter layout previews, and
   notices for Flutter templates and rendering fonts/icons.
 - Document SDK requirements, geometry assumptions, and native runtime

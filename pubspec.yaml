@@ -1,6 +1,6 @@
 name: duo_rail_kit
 description: Flutter layout helpers and an iOS plugin for system-directed side rails and safe-area spacing on iPhone Duo.
-version: 0.1.0
+version: 0.1.1
 repository: https://github.com/zawasystem/duo_rail_kit
 issue_tracker: https://github.com/zawasystem/duo_rail_kit/issues
 topics:
@@ -17,7 +17,6 @@ screenshots:
     path: doc/images/split-left.png
   - description: Example app on the iOS 27.2 Simulator using the width-based bottom navigation on iPhone 17.
     path: doc/images/phone.png
-publish_to: 'none'
 
 environment:
   sdk: ^3.12.0

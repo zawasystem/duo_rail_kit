@@ -31,9 +31,13 @@ behavioral constraints, [MIGRATION.md](MIGRATION.md) for dependency migration, a
   required SDK availability and the selected runner's billing conditions.
 - Update README and CHANGELOG when API or behavior changes. Use English
   Conventional Commits. The approved license is MIT, copyright 2026 ZAWA SYSTEM.
-  The GitHub repository is public. Keep `publish_to: 'none'` until pub.dev
-  publication is separately authorized. Public Git hosting, a dry run, or MIT
-  licensing does not authorize publishing to pub.dev.
+  The GitHub repository is public. Publish to pub.dev only as part of an
+  explicitly authorized release. Before publishing, review the version,
+  changelog, validation results, dry-run warnings, and archive contents.
+  Published versions and tags stay fixed; use a new version for later changes.
+  Keep the release tag and published archive tied to the reviewed source.
+  Public Git hosting, a dry run, or MIT licensing alone does not authorize
+  publication.
 - Label simulated example renders clearly. They do not verify native trait
   events, rotation, folding, or Split View behavior on a device.
 - Never claim CI, a publication dry run, or runtime checks passed without the

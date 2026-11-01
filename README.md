@@ -5,8 +5,7 @@ by iOS on iPhone Duo, with shared safe-area and floating-action-button helpers.
 Applications retain their own navigation, appearance, breakpoints, and content.
 The only runtime dependency is Flutter.
 
-MIT licensed and publicly available on GitHub. Version 0.1.0 is not published
-on pub.dev; publishing there remains a separate step. See the
+MIT licensed, with source available on GitHub. See the
 [publication checklist](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/publication.md).
 
 The example app on the iOS 27.2 Simulator:
@@ -37,7 +36,19 @@ is built through a Flutter iOS host, not directly with `swift build` in isolatio
 
 ## Installation
 
-Use the `0.1.0` release tag from the public Git repository:
+Add the hosted package to your application's `pubspec.yaml`:
+
+```yaml
+dependencies:
+  duo_rail_kit: ^0.1.1
+```
+
+Run `flutter pub get` and commit the application's updated `pubspec.lock`.
+For versions and API documentation, see
+[pub.dev](https://pub.dev/packages/duo_rail_kit).
+
+For applications retaining the earlier Git dependency, the `0.1.0` release tag
+remains fixed and available:
 
 ```yaml
 dependencies:
@@ -53,8 +64,8 @@ resolved commit is reviewable and reproducible. See
 [Git dependency access](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/ci_authentication.md)
 for CI setup and dependency verification.
 
-For local package development, replace the `git` entry with
-`path: ../duo_rail_kit`, adjusted for your directory layout.
+For local package development, use `duo_rail_kit: {path: ../duo_rail_kit}`
+instead, adjusted for your directory layout.
 
 ## Root integration
 
@@ -79,7 +90,8 @@ can recreate navigation and page state.
 
 ## Run the example
 
-The [example app](example/README.md) includes iOS and Android hosts:
+The [example app](example/README.md) includes iOS and Android hosts. Clone the
+repository to use its pinned SDK and development tools, then run:
 
 ```sh
 cd example
@@ -241,7 +253,8 @@ can use `enabledOf` to keep their content clear of the FAB.
 
 ## Development and validation
 
-Run from this repository's root:
+Clone the GitHub repository and run from its root. The `.fvmrc` and development
+scripts belong to the source checkout and are excluded from the pub.dev archive.
 
 ```sh
 fvm flutter pub get

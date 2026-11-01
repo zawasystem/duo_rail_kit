@@ -4,7 +4,8 @@ Read [README.md](README.md) for the API and its limitations, and
 [CLAUDE.md](https://github.com/zawasystem/duo_rail_kit/blob/main/CLAUDE.md) for the shared maintenance instructions. Contributions are
 made under the [MIT License](LICENSE).
 
-Use the SDK selected by `.fvmrc`. From the package root:
+Work in a Git checkout and use the SDK selected by `.fvmrc`. Development scripts
+and the SDK pin are excluded from the pub.dev archive. From the package root:
 
 ```sh
 fvm flutter pub get

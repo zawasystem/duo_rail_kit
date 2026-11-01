@@ -7,7 +7,9 @@ it does not substitute simulated device values.
 
 ## Run
 
-From the repository root:
+Clone the GitHub repository, then run from its root. The pinned SDK configuration
+and optional preview renderer are development tools excluded from the pub.dev
+archive.
 
 ```sh
 cd example

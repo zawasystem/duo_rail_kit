@@ -1,9 +1,20 @@
-# Publication preparation
+# Publication checklist
 
-The GitHub repository is public and uses the [MIT License](../LICENSE),
-copyright 2026 ZAWA SYSTEM. Version 0.1.0 is available through Git and is not
-published on pub.dev. Keep `publish_to: 'none'` in `pubspec.yaml` until pub.dev
-publication is separately authorized.
+The package uses the [MIT License](../LICENSE), copyright 2026 ZAWA SYSTEM.
+These steps describe release preparation and verification, not evidence that a
+release has completed. Publishing requires explicit authorization.
+
+## Version and release contents
+
+The initial pub.dev release is numbered 0.1.1. The existing Git-only
+`0.1.0` tag stays fixed. Use a new version for later changes; do not replace a
+published version or move a release tag.
+
+Before each release, align `pubspec.yaml`, the changelog, and the README's
+installation instructions. Check the intended publishing account and package
+destination. For an authorized pub.dev release, omit `publish_to: 'none'` from
+the root package; the example application keeps its publication guard. Match
+the release tag to the source used for the reviewed archive.
 
 ## Compatibility to verify
 
@@ -29,19 +40,35 @@ an older revision for a changed release candidate. The documentation images are
 Simulator screenshots and the local Flutter previews are simulated; neither
 replaces runtime checks on a device.
 
-The publishing dry run must run in an isolated staging copy with
-`publish_to: 'none'` removed only in that copy:
+Run the publishing dry run from the prepared release source. If evaluating an
+unapproved release whose manifest still contains `publish_to: 'none'`, remove
+that guard only in an isolated staging copy:
 
 ```sh
-# From the staged package, using the selected Flutter SDK.
+# From the release source or staging copy, using the selected Flutter SDK.
 fvm flutter pub publish --dry-run
 ```
 
-Review every warning and the proposed file list. This command must not publish
-anything. Keep the real package's publication guard until authorization. After
-the dry run, inspect the archive contents for example sources, the license,
+Review every warning and the proposed file list. The dry run does not publish
+anything. Inspect the archive contents for example sources, the license,
 required iOS files, and absent credentials, caches, local paths, and unrelated
 application files. Validate the README links and images from that file set.
+Development commands that depend on excluded scripts or `.fvmrc` must direct
+readers to a Git checkout.
+
+## Publish and verify
+
+After the release checks pass and publication is authorized, publish the same
+reviewed source with `fvm flutter pub publish`. Complete the publishing account's
+authentication if requested. Do not interpret a command starting or a browser
+login succeeding as proof that the upload finished.
+
+Verify the package version on pub.dev, download and inspect its archive, and
+resolve that hosted version from a clean consumer with an empty Pub cache.
+Check the published README, images, API documentation, and analysis results.
+Record the matching release commit and immutable tag. Keep existing Git
+consumers on their selected refs until their dependency source is deliberately
+updated and validated.
 
 ## Repository and CI review
 
