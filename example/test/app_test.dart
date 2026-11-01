@@ -186,6 +186,39 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('content paints past the safe area while reveals stay inside it', (tester) async {
+    final scroll = find.byKey(const ValueKey('content-scroll'));
+
+    // Beside a system rail the viewport is the safe area (16 added at the top, 34 at the bottom) and the content is
+    // painted past it, so the list is not clipped at the insets.
+    await preview(tester);
+    expect(tester.getRect(scroll), const Rect.fromLTRB(0, 16, 867, 635));
+    expect(tester.widget<SingleChildScrollView>(scroll).clipBehavior, Clip.none);
+    expect(tester.widget<SingleChildScrollView>(scroll).padding, const EdgeInsets.fromLTRB(20, 20, 20, 100));
+
+    // A note revealed from under a 62-point status bar lands below it, not behind it.
+    await preview(tester, size: const Size(402, 874), safeArea: const EdgeInsets.only(top: 62, bottom: 34), edge: null);
+    await tester.tap(find.text('State'));
+    await tester.pumpAndSettle();
+    final position = tester
+        .state<ScrollableState>(find.descendant(of: scroll, matching: find.byType(Scrollable)).first)
+        .position;
+    await tester.ensureVisible(note);
+    await tester.pumpAndSettle();
+    position.jumpTo(position.pixels + tester.getTopLeft(note).dy - 50);
+    await tester.pumpAndSettle();
+    expect(tester.getTopLeft(note).dy, 50);
+    await tester.tapAt(tester.getBottomLeft(note) + const Offset(40, -12));
+    await tester.pumpAndSettle();
+    final editable = tester.state<EditableTextState>(find.byType(EditableText)).renderEditable;
+    final caret = MatrixUtils.transformRect(
+      editable.getTransformTo(null),
+      editable.getLocalRectForCaret(const TextPosition(offset: 0)),
+    );
+    expect(caret.top, greaterThanOrEqualTo(62));
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('narrow phone at large text can reach and use the note', (tester) async {
     await preview(
       tester,

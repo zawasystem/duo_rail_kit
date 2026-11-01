@@ -61,7 +61,7 @@ class DuoRailExampleApp extends StatelessWidget {
   );
 }
 
-/// Renders labelled, simulated layouts for tests and documentation.
+/// Renders labelled, simulated layouts for tests and local previews.
 ///
 /// Bypasses the native plugin. Set the test view's logical size to [size].
 class DuoRailPreviewApp extends StatelessWidget {
@@ -284,10 +284,13 @@ class _DemoContentState extends State<_DemoContent> {
             ],
           )
         : null,
+    // Keep the viewport inside the safe area so caret, focus and accessibility reveals stay clear of the status bar,
+    // but paint the content past it so the list is not clipped below the status bar or above the home indicator.
     body: SafeArea(
       child: SingleChildScrollView(
         key: const ValueKey('content-scroll'),
         controller: _scroll,
+        clipBehavior: Clip.none,
         padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
         child: Center(
           child: ConstrainedBox(
