@@ -9,12 +9,15 @@ MIT licensed and publicly available on GitHub. Version 0.1.0 is not published
 on pub.dev; publishing there remains a separate step. See the
 [publication checklist](https://github.com/zawasystem/duo_rail_kit/blob/main/docs/publication.md).
 
-![Example layouts](doc/images/overview.png)
+The example app on the iOS 27.2 Simulator:
 
-*The example app on the iOS 27.2 Simulator: iPhone Duo inner display, with the rail in the system's right column.*
-[Outer display, right rail](doc/images/duo-right.png) ·
-[Left Split View rail](doc/images/split-left.png) ·
-[iPhone 17, bottom bar](doc/images/phone.png)
+![iPhone Duo inner display with the rail in the system's right column](doc/images/overview.png)
+
+*iPhone Duo inner display: the rail sits in the system's right column.*
+
+| Outer display, right rail | Left Split View app, left rail | iPhone 17, bottom bar |
+| :---: | :---: | :---: |
+| <img src="doc/images/duo-right.png" alt="iPhone Duo outer display with a right-hand rail" height="360"> | <img src="doc/images/split-left.png" alt="Left Split View app on iPhone Duo with a left-hand rail" height="360"> | <img src="doc/images/phone.png" alt="iPhone 17 with bottom navigation" height="360"> |
 
 ## Requirements
 
