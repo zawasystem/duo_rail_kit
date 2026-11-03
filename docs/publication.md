@@ -20,7 +20,7 @@ the release tag to the source used for the reviewed archive.
 
 | Area | Current contract | Before pub.dev release |
 | --- | --- | --- |
-| Development SDK | Flutter `>=3.47.8`, development pinned to 3.47.8 via FVM; Dart `^3.12.0` | Confirm a clean installation from publicly available SDK distributions. Test the advertised minimum and intended stable SDK. |
+| Development SDK | Flutter `>=3.47.8`, development pinned to 3.47.9 via FVM; Dart `^3.12.0` | Confirm a clean installation from publicly available SDK distributions. Test the advertised minimum and intended stable SDK: CI analyzes and tests both, and the publishing workflow runs the minimum-SDK analysis and tests before the publish job. Keep the minimum in both workflows aligned with the `pubspec.yaml` lower bound. |
 | iOS integration | Swift Package Manager; minimum deployment target 15.0 | Confirm dependency resolution and generated plugin registration in a clean host. CocoaPods is not provided. |
 | Native compilation | iOS 27.1 SDK declares `verticalBarEdge` | Confirm that the build machine and CI runner supply the SDK. The deployment minimum is not the compilation SDK requirement. |
 | Native behavior | Trait access is guarded for iOS 27.1 | Check supported Duo orientations, both Split View sides, rotation/folding, and status-bar visibility on a suitable simulator or device. |

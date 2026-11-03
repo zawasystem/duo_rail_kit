@@ -21,7 +21,8 @@ The example app on the iOS 27.2 Simulator:
 ## Requirements
 
 - Package constraints: Flutter `>=3.47.8` and Dart `^3.12.0`. Development uses
-  Flutter 3.47.8, selected by `.fvmrc`; other SDK versions need validation.
+  Flutter 3.47.9, selected by `.fvmrc`. CI analyzes and tests the package and
+  example with both 3.47.8 and 3.47.9; other SDK versions need validation.
 - iOS integration: Swift Package Manager, with an iOS deployment target of at
   least 15.0. CocoaPods integration is not provided.
 - Native compilation: Xcode with the iOS 27.1 SDK, which declares

@@ -13,7 +13,36 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
+  minimum_sdk:
+    name: Minimum Flutter SDK (analyze + test)
+    if: github.repository == 'zawasystem/duo_rail_kit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          # The flutter lower bound in pubspec.yaml.
+          flutter-version: 3.47.8
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Resolve example dependencies
+        working-directory: example
+        run: flutter pub get
+      - run: flutter analyze --no-pub
+      - run: flutter test --no-pub
+      - name: Analyze example
+        working-directory: example
+        run: flutter analyze --no-pub
+      - name: Test example
+        working-directory: example
+        run: flutter test --no-pub
+
   publish:
+    needs: minimum_sdk
     if: github.repository == 'zawasystem/duo_rail_kit'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -43,7 +72,7 @@ jobs:
           PY
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
-          flutter-version: 3.47.8
+          flutter-version: 3.47.9
           channel: stable
           cache: true
       - run: flutter pub get
