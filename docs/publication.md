@@ -14,7 +14,7 @@ and tags stay fixed: use a new version for later changes and never move a tag.
 | --- | --- | --- |
 | `0.1.0` | Git tag only | `b21e358959c31e077f062ff4aa8d387c5e1ea764` |
 | `0.1.1` | Published manually on 2026-11-01; verified publisher `zawasystem.com` | [tag `0.1.1`](https://github.com/zawasystem/duo_rail_kit/releases/tag/0.1.1), `fc3b2e09ad693bee0c075d0f9f41c61df7d621f9` |
-| `0.2.0` | Unpublished | — |
+| `0.2.0` | Published by the GitHub Actions workflow on 2026-11-07 (JST); verified publisher `zawasystem.com` | [tag `0.2.0`](https://github.com/zawasystem/duo_rail_kit/releases/tag/0.2.0), `454b4cfbbef9a774678619b571b0e1e0a2dd1ec8` |
 
 ## Release-candidate checks
 
@@ -62,8 +62,10 @@ GitHub Actions publishing on the package's pub.dev Admin page with repository
 Actions environment there is optional and the owner's decision, and needs an
 `environment:` line with the same name on the `publish` job in the same change.
 
-State: not verified. Check it on the pub.dev Admin page before tagging and
-record the result with its date here.
+State on 2026-11-07, read on the pub.dev Admin page: publishing from GitHub
+Actions is enabled for `zawasystem/duo_rail_kit` with tag pattern `{{version}}`
+and push events; `workflow_dispatch` events and a required environment are off.
+Manual publishing is also enabled. Recheck it before each tag.
 
 The workflow does not compile or run the native plugin, so finish the native
 checks first. Push a release tag only after review and authorisation; never
