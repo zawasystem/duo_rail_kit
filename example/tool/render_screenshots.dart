@@ -41,6 +41,19 @@ void main() {
       safeArea: EdgeInsets.only(right: 84, bottom: 34),
       edge: HorizontalEdge.right,
       label: 'Inner landscape',
+      topBar: null,
+      verticalBar: null,
+      detail: false,
+    ),
+    (
+      file: 'top-band.png',
+      size: Size(669, 951),
+      safeArea: EdgeInsets.only(top: 82, bottom: 34),
+      edge: null,
+      label: 'Inner portrait band',
+      topBar: TopBarRegion(rect: Rect.fromLTRB(16, 24, 525, 72), safeTop: 82, viewSize: Size(669, 951)),
+      verticalBar: null,
+      detail: false,
     ),
     (
       file: 'duo-right.png',
@@ -48,6 +61,9 @@ void main() {
       safeArea: EdgeInsets.only(right: 84, bottom: 34),
       edge: HorizontalEdge.right,
       label: 'Outer portrait',
+      topBar: null,
+      verticalBar: null,
+      detail: false,
     ),
     (
       file: 'split-left.png',
@@ -55,6 +71,9 @@ void main() {
       safeArea: EdgeInsets.only(bottom: 34),
       edge: HorizontalEdge.left,
       label: 'Left Split View',
+      topBar: null,
+      verticalBar: null,
+      detail: false,
     ),
     (
       file: 'phone.png',
@@ -62,6 +81,42 @@ void main() {
       safeArea: EdgeInsets.only(top: 59, bottom: 34),
       edge: null,
       label: 'Phone fallback',
+      topBar: null,
+      verticalBar: null,
+      detail: false,
+    ),
+    (
+      file: 'vertical-toolbar.png',
+      size: Size(951, 669),
+      safeArea: EdgeInsets.only(right: 84, bottom: 34),
+      edge: HorizontalEdge.right,
+      label: 'Inner landscape detail',
+      topBar: null,
+      // The inner landscape region; the top of the top bar region was measured in a UIKit window.
+      verticalBar: VerticalBarRegion(
+        rect: Rect.fromLTRB(879, 124, 927, 635),
+        edge: HorizontalEdge.right,
+        viewSize: Size(951, 669),
+        topBarTop: 24,
+      ),
+      // Pushes the detail page from Overview before rendering.
+      detail: true,
+    ),
+    (
+      file: 'vertical-tabs.png',
+      size: Size(951, 669),
+      safeArea: EdgeInsets.only(right: 84, bottom: 34),
+      edge: HorizontalEdge.right,
+      label: 'Inner landscape tabs',
+      topBar: null,
+      // The same region: the Overview tab's actions are drawn in the column above the rail.
+      verticalBar: VerticalBarRegion(
+        rect: Rect.fromLTRB(879, 124, 927, 635),
+        edge: HorizontalEdge.right,
+        viewSize: Size(951, 669),
+        topBarTop: 24,
+      ),
+      detail: false,
     ),
   ];
 
@@ -83,10 +138,19 @@ void main() {
             safeArea: fixture.safeArea,
             edge: fixture.edge,
             label: fixture.label,
+            topBar: fixture.topBar,
+            verticalBar: fixture.verticalBar,
           ),
         ),
       );
       await tester.pumpAndSettle();
+      if (fixture.detail) {
+        final openDetail = find.byKey(const ValueKey('open-detail'));
+        await tester.ensureVisible(openDetail);
+        await tester.pumpAndSettle();
+        await tester.tap(openDetail);
+        await tester.pumpAndSettle();
+      }
       expect(tester.takeException(), isNull);
       final boundary = boundaryKey.currentContext!.findRenderObject()! as RenderRepaintBoundary;
       // Real IO and image encoding must run outside the widget test fake clock.

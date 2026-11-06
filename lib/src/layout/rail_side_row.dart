@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 
-import 'vertical_bar_edge.dart';
+import '../core/horizontal_edge.dart';
 
 /// Places a rail in a stable `[left slot, content, right slot]` row.
 ///
@@ -9,14 +9,15 @@ import 'vertical_bar_edge.dart';
 /// state. Keep [contentKey]: when both end slots change, an unkeyed middle child
 /// can otherwise be recreated.
 ///
-/// Edges are physical, even in RTL. Only the row order is forced to LTR; the
-/// content retains its inherited text direction.
+/// Edges are physical, even with right-to-left text: only the row order is forced
+/// to left-to-right, and the content keeps its inherited text direction.
 class RailSideRow extends StatelessWidget {
   const RailSideRow({super.key, required this.railEdge, required this.rail, required this.content});
 
   /// The physical rail edge, or null to omit the rail and use bottom navigation.
   final HorizontalEdge? railEdge;
 
+  /// The rail, built in the [railEdge] slot; not built when [railEdge] is null.
   final Widget rail;
 
   /// The content, expanded to fill the remaining width.
@@ -27,7 +28,6 @@ class RailSideRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Row(
-    // Keep physical edges independent of the surrounding text direction.
     textDirection: TextDirection.ltr,
     children: [
       if (railEdge == HorizontalEdge.left) rail else const SizedBox.shrink(),

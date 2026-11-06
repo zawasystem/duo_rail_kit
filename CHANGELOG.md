@@ -1,5 +1,38 @@
 # Changelog
 
+## 0.2.0
+
+- Add `TopBarRegion`, `VerticalBarRegion`, and `BarRegionScope`: the system's
+  top bar region (the band beside the Duo inner portrait status display) and the
+  vertical bar's item region (iOS 27.1+, phone idiom). They arrive as optional
+  `topBar` and `verticalBar` payload keys; the channel, methods, existing keys,
+  and ordering are unchanged, and screens without a region get the 0.1.1
+  payload. The plugin also resends when the top bar layout guide moves, observed
+  with one hidden, non-interactive view.
+- `VerticalBarEdge` now builds `VerticalBarEdgeScope` > `BarRegionScope` >
+  child. Tests that build `VerticalBarEdgeScope` directly get null regions; add
+  a `BarRegionScope`.
+- Add `VerticalBarPage` and its types (`VerticalBarSlots`, `VerticalBarAction`,
+  `VerticalBarMenuItem`, `VerticalBarInvocation`, `VerticalBarCell`,
+  `VerticalBarBack`, and three typedefs): a full-window pushed page's back
+  control and actions in the vertical bar column, where UIKit puts them, with
+  an overflow menu. `VerticalBarCell.tooltipConstraints` gives application
+  controls the default controls' tooltip constraints.
+- Add `VerticalBarShell` (with `railPaddingOf`) and `VerticalBarRailEnd`: the
+  same for tab pages, above a rail on the column's edge.
+- Add `VerticalBarColumn`, and `RailPlacement.systemRailWidth` (96), which
+  centres a rail and its cells on the vertical bar.
+- Add `RailLayout`, which reads a rail's placement and safe area in one context
+  and derives its width and padding from them.
+- Upgrading: 0.1.1 APIs and constants behave as before and need no code
+  changes. A caret constraint on 0.1.x does not select 0.2.0; update the
+  manifest and lockfile, and rebuild the iOS app for the new native code. To
+  roll back, restore the previous manifest and lockfile.
+- Checked on the iOS 27.2 Simulator only; see the README's
+  [Limitations](README.md#limitations).
+- Example: a band-aware app bar, region readouts, a detail page with column
+  actions, and tab pages in a `VerticalBarShell`, using `RailLayout`.
+
 ## 0.1.1
 
 - Prepare the plugin for its initial pub.dev release, with hosted-package

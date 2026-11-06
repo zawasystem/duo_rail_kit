@@ -2,7 +2,7 @@ import 'package:duo_rail_kit/duo_rail_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Geometry measured with a real Scaffold before package extraction.
+/// Geometry measured with a real Scaffold.
 /// Keep these expectations independent of the implementation's calculations.
 
 const Key _fabKey = ValueKey('fab');

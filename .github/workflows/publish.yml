@@ -41,8 +41,44 @@ jobs:
         working-directory: example
         run: flutter test --no-pub
 
+  validate:
+    name: Release validation (format, analyze, test, dry run)
+    if: github.repository == 'zawasystem/duo_rail_kit'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
+        with:
+          # The development SDK (.fvmrc). The publish job installs the same
+          # version; update them together.
+          flutter-version: 3.47.9
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Resolve example dependencies
+        working-directory: example
+        run: flutter pub get
+      - name: Check formatting
+        run: dart format --output=none --set-exit-if-changed lib test example/lib example/test example/tool
+      - run: flutter analyze --no-pub
+      - run: flutter test --no-pub
+      - name: Analyze example
+        working-directory: example
+        run: flutter analyze --no-pub
+      - name: Test example
+        working-directory: example
+        run: flutter test --no-pub
+      - name: Validate publication archive
+        run: flutter pub publish --dry-run
+
+  # This job can request the OIDC token, so it uses no third-party actions (only
+  # the Flutter SDK and GitHub's and the Dart team's actions); the checks run in
+  # the jobs it needs.
   publish:
-    needs: minimum_sdk
+    needs: [minimum_sdk, validate]
     if: github.repository == 'zawasystem/duo_rail_kit'
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -70,28 +106,24 @@ jobs:
           if not re.search(r'^name: duo_rail_kit[ \t]*$', manifest, re.MULTILINE):
               raise SystemExit('Unexpected package name.')
           PY
-      - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
-        with:
-          flutter-version: 3.47.9
-          channel: stable
-          cache: true
-      - run: flutter pub get
-      - name: Resolve example dependencies
-        working-directory: example
-        run: flutter pub get
-      - name: Check formatting
-        run: dart format --output=none --set-exit-if-changed lib test example/lib example/test example/tool
-      - run: flutter analyze --no-pub
-      - run: flutter test --no-pub
-      - name: Analyze example
-        working-directory: example
-        run: flutter analyze --no-pub
-      - name: Test example
-        working-directory: example
-        run: flutter test --no-pub
-      - name: Validate publication archive
-        run: flutter pub publish --dry-run
-      # Obtain the short-lived credential only after validation has finished.
+      - name: Install Flutter SDK
+        # The SDK of the validate job's dry run (.fvmrc); FLUTTER_COMMIT is that
+        # tag's commit. Update them together. The SDK's first run and the
+        # package's dependencies are set up here, before the token exists.
+        env:
+          FLUTTER_TAG: 3.47.9
+          FLUTTER_COMMIT: c197ca5199e9ee5661e865596c9c07294dfab51c
+        run: |
+          git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$FLUTTER_TAG" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          if [ "$(git -C "$RUNNER_TEMP/flutter" rev-parse HEAD)" != "$FLUTTER_COMMIT" ]; then
+            echo "Flutter tag $FLUTTER_TAG does not point to the reviewed commit $FLUTTER_COMMIT." >&2
+            exit 1
+          fi
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
+          "$RUNNER_TEMP/flutter/bin/flutter" --version
+          "$RUNNER_TEMP/flutter/bin/flutter" pub get
+      # The Dart team's action configures the short-lived pub.dev token from
+      # GitHub OIDC, so only the publish step follows it.
       - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
         with:
           sdk: '3.13.7'

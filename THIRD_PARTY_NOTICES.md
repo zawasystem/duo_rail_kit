@@ -9,7 +9,7 @@ archive; the documentation images contain rendered text and icons.
 The iOS and Android hosts in `example/ios/` and `example/android/` were generated
 from Flutter SDK 3.47.8 templates and adapted for this standalone example.
 Their template-derived code and generated template assets retain Flutter's
-license. Source: [Flutter templates](https://github.com/flutter/flutter/tree/master/packages/flutter_tools/templates).
+licence. Source: [Flutter templates](https://github.com/flutter/flutter/tree/master/packages/flutter_tools/templates).
 The following notice is reproduced verbatim from that SDK's root `LICENSE`:
 
 ```text
@@ -54,17 +54,17 @@ The app bundles only Flutter's `MaterialIcons-Regular.otf`
 `MaterialIcons-Regular.otf` from the selected Flutter SDK's
 `bin/cache/artifacts/material_fonts/` and writes its previews under
 `example/build/`, which is not committed. Neither path downloads replacement
-fonts or embeds font files in the repository. The source files and license files
+fonts or embeds font files in the repository. The source files and licence files
 checked for these notices are in the
-[Flutter material-font artifact](https://storage.googleapis.com/flutter_infra_release/flutter/fonts/3012db47f3130e62f7cc0beabff968a33cbec8d8/fonts.zip),
+[Flutter material-font artefact](https://storage.googleapis.com/flutter_infra_release/flutter/fonts/3012db47f3130e62f7cc0beabff968a33cbec8d8/fonts.zip),
 selected by the SDK's `bin/internal/material_fonts.version`.
 
 ### Roboto — Apache License 2.0
 
 - Creator: Google.
 - Embedded font copyright: `Copyright 2011 Google Inc. All Rights Reserved.`
-- Source file: `Roboto-Regular.ttf`; accompanying license: `Roboto_LICENSE.txt`.
-- License: [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
+- Source file: `Roboto-Regular.ttf`; accompanying licence: `Roboto_LICENSE.txt`.
+- Licence: [Apache License, Version 2.0](https://www.apache.org/licenses/LICENSE-2.0).
 
 Roboto is used only by the local preview renderer. It does not appear in
 `doc/images/*.png`, and the font file is not distributed here.
@@ -73,19 +73,18 @@ Roboto is used only by the local preview renderer. It does not appear in
 
 - Creator: Google.
 - Embedded font copyright: `Copyright 2019 Google LLC. All Rights Reserved.`
-- Source file: `MaterialIcons-Regular.otf`; accompanying license:
+- Source file: `MaterialIcons-Regular.otf`; accompanying licence:
   `MaterialIcons_LICENSE.txt`.
-- License supplied with this exact Flutter artifact:
+- Licence supplied with this exact Flutter artefact:
   [Creative Commons Attribution 4.0 International](https://creativecommons.org/licenses/by/4.0/),
   with its [legal code](https://creativecommons.org/licenses/by/4.0/legalcode).
 
-Material Icons glyphs are rasterized, scaled, and colored within the example UI
+Material Icons glyphs are rasterised, scaled, and coloured within the example UI
 captured in `doc/images/*.png`. The font file and glyph outlines are not modified or
 redistributed. The images' icon elements retain the supplied CC BY 4.0 terms;
 the package's MIT notice does not replace them. Neither Google nor the Flutter
-Authors endorse this package. The supplied license disclaims warranties; see
+Authors endorse this package. The supplied licence disclaims warranties; see
 the linked legal code.
 
-These notices describe the artifacts actually used, rather than assuming that
-another version of Roboto or Material Icons has identical licensing. Recheck
-the selected artifact's notices when changing the renderer's SDK or fonts.
+These notices describe the artefacts actually used, rather than assuming that
+another version of Roboto or Material Icons has identical licensing.

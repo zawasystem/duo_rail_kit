@@ -1,15 +1,13 @@
 # Duo Rail Kit example
 
-A runnable Flutter app with an actual navigation rail, bottom navigation, and a
-small state-preservation lab. It uses the local package through `path: ../` and
-works offline. The production entry point reads the real window and native edge;
-it does not substitute simulated device values.
+A runnable app with a navigation rail, bottom navigation, and a small
+state-preservation lab. It uses the local package (`path: ../`), works offline,
+and its entry point reads only the real window and native edge.
 
 ## Run
 
-Clone the GitHub repository, then run from its root. The pinned SDK configuration
-and optional preview renderer are development tools excluded from the pub.dev
-archive.
+From a clone of the repository (the pinned SDK and the preview renderer are not
+in the pub.dev archive):
 
 ```sh
 cd example
@@ -18,65 +16,58 @@ fvm flutter devices
 fvm flutter run -d <device-id>
 ```
 
-The parent `.fvmrc` supplies the Flutter version. The iOS host requires Xcode 27.1
-or later to compile the plugin's native trait API and supports iOS 15.0 or later
-at runtime. Swift Package Manager is explicitly enabled in this app's pubspec;
-CocoaPods is not used. Device signing is configured locally in Xcode when needed;
-no team identifier, certificates, or provisioning profiles are included.
-
-Android uses the standard Flutter Gradle toolchain. No application network calls,
-Firebase configuration, account, analytics, or runtime permissions are needed.
-The Flutter-generated **debug/profile** manifests retain the development-only
-Internet permission for the VM service, hot reload, and debugging. The release
-manifest declares no permissions. The launcher icons are the standard Flutter
-example assets, not Duo Rail Kit branding; see the repository's third-party
-notices.
+The parent `.fvmrc` supplies the Flutter version, the iOS host follows the
+package [requirements](../README.md#requirements), and this pubspec enables
+Swift Package Manager. Signing is local to Xcode: the project holds no team,
+certificates, or profiles. The app makes no network calls and needs no account
+or runtime permissions; only the generated Android debug and profile manifests
+keep the development Internet permission.
 
 ## Explore
 
-- **Layout** shows the current placement, occupied rail width, and top safe area.
-  On supported iOS environments the native system edge takes precedence. Without
-  an edge, a window at least 600 logical pixels wide uses a left rail; narrower
-  windows use bottom navigation. The fallback width is an example-app choice.
-- **State** has a tap counter and text field. Add taps, enter a note, and rotate,
-  resize, fold, or change Split View. The values remain in the content widget's
-  state across layout and destination changes. They are not persisted after the
-  app closes.
-- **About** explains the integration order and layout rules.
-- The floating **+** adds a tap from any destination. Beside the system rail it
-  uses `RailSideFab.locationOf` and sits 24 logical pixels above the content
-  bottom, including when the keyboard is open. The scroll viewport stays inside
-  the safe area, so caret and focus reveals stay clear of the status bar, but the
-  content is painted past it and is not clipped at the status bar or home
-  indicator. Scroll padding keeps the last controls reachable behind the
-  floating action.
+Values in this README are logical pixels (iOS points).
 
-`lib/main.dart` launches `DuoRailExampleApp`; the integration is in `lib/app.dart`.
-`VerticalBarEdge` wraps `SideStatusBarInsets` at the root. The shell uses
-`RailPlacement.railSafeAreaOf` for both width and rail geometry, uses an 84-pixel
-system column, and passes `centredRailSafeArea` to a scrollable `NavigationRail`.
-It removes the occupied edge's safe-area padding from the body once.
-`RailSideRow`, `RailSideFab`, and the body `MediaQuery` always stay in the tree.
-The rail is inset above the keyboard while the inner content scaffold handles
-its own keyboard resize, avoiding duplicate resizing of the body.
+- **Layout** shows the placement, rail width, top safe area, and the regions iOS
+  reports; without a native edge, windows at least 600 wide get a left rail (an
+  example choice).
+- **Open detail** pushes a `VerticalBarPage`; where the
+  [vertical bar column is used](../README.md#when-the-column-is-used), its back
+  control and actions move into it. **More actions** adds seven, for ten; on Duo
+  inner landscape the last three overflow.
+- On the **tab screens**, where the
+  [shell uses the column](../README.md#tab-shells), `VerticalBarShell` moves the
+  reset and About actions into it above the system rail; **Rail tabs** in the
+  State lab adds placeholder tabs (3, 5, 6, or 7 in all), and actions that no
+  longer fit overflow.
+- **State** keeps a counter and a text field across rotation, folding, Split
+  View, and tab changes.
+- In the **top band** (the band beside the status display, Duo inner portrait)
+  each app bar's toolbar row moves into it.
+- The **+** button uses `RailSideFab.locationOf` beside the system rail.
 
-The native status-bar-hidden value refreshes on trait/geometry changes and app
-resume, not continuously. The shared status-display exclusion band is a
-conservative 152 logical pixels when the column contains a visible status bar.
-These are existing package constraints; see the [package README](../README.md).
+## Where the code is
+
+`lib/main.dart` launches `DuoRailExampleApp`; `lib/app.dart` holds the
+integration:
+
+- `_DemoShell` reads `RailLayout.of` once, passes its `centredSafeArea`,
+  through `VerticalBarShell.railPaddingOf`, to a scrollable `NavigationRail`
+  ending with `VerticalBarRailEnd`, removes the rail's edge from the body with
+  `removeRailEdge`, and gives the tab screens `contentRect` as their pane. The
+  shell, `RailSideFab`, and the body `MediaQuery` always stay in the tree.
+- `_DemoAppBar` moves its toolbar row into the `TopBarRegion.of` band, padded
+  for its pane.
+- `_DetailPage` builds its `Scaffold` in `VerticalBarPage` and reuses
+  `_DemoAppBar` with the whole window as its pane.
 
 ## Tests and simulated renders
 
-```sh
-fvm flutter analyze
-fvm flutter test
-```
+`fvm flutter test` covers live entry, the readouts, both column edges, width
+fallbacks, state preservation, RTL, large text, the keyboard, the FAB, the top
+band, and the column's cells, overflow menu, and fallbacks on the detail page
+and above the rail; it does not replace device testing.
 
-The tests cover live entry, 84-pixel columns on either physical edge, width
-fallbacks, state preservation when moving/removing the rail, RTL, enlarged text,
-and keyboard/FAB geometry. They do not replace native device testing.
-
-`DuoRailPreviewApp`, exported by `lib/main.dart`, is a test and local preview harness:
+`DuoRailPreviewApp`, exported by `lib/main.dart`, is a test and preview harness:
 
 ```dart
 DuoRailPreviewApp(
@@ -87,19 +78,14 @@ DuoRailPreviewApp(
 )
 ```
 
-Optional inputs include `statusBarHidden`, `textScale`, `viewInsets`, and
-`textDirection`. Match the widget test view's logical size to `size`. Every
-preview displays **SIMULATED LAYOUT** and its label. It injects geometry into the
-same shell without querying the native channel; it is not an iOS emulator or
-evidence that native rotation, folding, or Split View events work. No simulated
-device switcher is exposed in the running app.
+Other inputs are `statusBarHidden`, `textScale`, `viewInsets`, `textDirection`,
+`topBar`, and `verticalBar` (with an optional `topBarTop`). A region is used
+only when its `viewSize` matches `size` (set the test view's logical size to
+`size`) and a `topBar`'s `safeTop` matches the top safe area (`safeArea.top`,
+or the 16 `SideStatusBarInsets` adds). Every preview shows **SIMULATED LAYOUT**:
+it injects geometry without the native channel, so it proves nothing about
+native rotation, folding, or Split View events.
 
-`tool/render_screenshots.dart` renders four such previews into
-`build/simulated_previews/` (ignored by Git) for local layout checks:
-
-```sh
-fvm flutter test tool/render_screenshots.dart
-```
-
-The package README's images are Simulator screenshots of the normal entry point
-instead; see [doc/images/README.md](../doc/images/README.md).
+`fvm flutter test tool/render_screenshots.dart` renders seven previews into
+`build/simulated_previews/` (ignored by Git). The package's images are Simulator
+screenshots instead ([details](../doc/images/README.md)).

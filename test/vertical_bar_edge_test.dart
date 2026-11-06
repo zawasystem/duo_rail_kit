@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'support/native_channel.dart';
+
 /// Displays inherited edge state and counts State recreation.
 class _Probe extends StatefulWidget {
   const _Probe();
@@ -42,27 +44,6 @@ Finder _shows(HorizontalEdge? edge) => find.textContaining(RegExp('^${RegExp.esc
 
 /// Checks both [edge] and [hidden].
 Finder _showsHidden(HorizontalEdge? edge, {required bool hidden}) => find.text('$edge hidden=$hidden');
-
-/// Returns [answer] from the mocked native query and counts requests.
-List<Object?> _answerGetEdge(WidgetTester tester, Object? Function() answer) {
-  final calls = <Object?>[];
-  tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(VerticalBarEdge.channel, (call) async {
-    calls.add(call.method);
-    return answer();
-  });
-  addTearDown(() => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(VerticalBarEdge.channel, null));
-  return calls;
-}
-
-/// Delivers a simulated native edgeChanged event.
-Future<void> _pushFromNative(WidgetTester tester, Object? value) async {
-  await tester.binding.defaultBinaryMessenger.handlePlatformMessage(
-    VerticalBarEdge.channel.name,
-    VerticalBarEdge.channel.codec.encodeMethodCall(MethodCall('edgeChanged', value)),
-    (_) {},
-  );
-  await tester.pump();
-}
 
 Future<void> _pump(WidgetTester tester) async {
   await tester.pumpWidget(const VerticalBarEdge(child: _Probe()));
@@ -116,7 +97,7 @@ void main() {
 
   group('VerticalBarEdge', () {
     testWidgets('iOS: exposes the initial native query result to descendants', (tester) async {
-      final calls = _answerGetEdge(tester, () => {'edge': 'right'});
+      final calls = answerGetEdge(tester, () => {'edge': 'right'});
       await _pump(tester);
 
       expect(calls, ['getEdge']);
@@ -124,19 +105,19 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('iOS: native events update the edge without recreating descendant State', (tester) async {
-      _answerGetEdge(tester, () => {'edge': 'right'});
+      answerGetEdge(tester, () => {'edge': 'right'});
       await _pump(tester);
 
-      await _pushFromNative(tester, {'edge': 'left'});
+      await pushFromNative(tester, {'edge': 'left'});
       expect(_shows(_left), findsOneWidget);
-      await _pushFromNative(tester, {'edge': 'none'});
+      await pushFromNative(tester, {'edge': 'none'});
       expect(_shows(null), findsOneWidget);
       expect(_ProbeState.created, 1, reason: 'value changes preserve the widget tree structure');
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('iOS: queries on size or safe-area changes, not keyboard-only viewInsets', (tester) async {
       Object? answer = {'edge': 'right'};
-      final calls = _answerGetEdge(tester, () => answer);
+      final calls = answerGetEdge(tester, () => answer);
       tester.view
         ..physicalSize = const Size(951, 669)
         ..devicePixelRatio = 1;
@@ -202,11 +183,11 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('iOS: legacy payloads without a sequence apply in arrival order', (tester) async {
-      _answerGetEdge(tester, () => {'edge': 'right'});
+      answerGetEdge(tester, () => {'edge': 'right'});
       await _pump(tester);
-      await _pushFromNative(tester, {'edge': 'left', 'sequence': 5});
+      await pushFromNative(tester, {'edge': 'left', 'sequence': 5});
       expect(_shows(_left), findsOneWidget);
-      await _pushFromNative(tester, {'edge': 'right'});
+      await pushFromNative(tester, {'edge': 'right'});
       expect(_shows(_right), findsOneWidget);
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
@@ -237,27 +218,27 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('iOS: exposes status-bar visibility and defaults missing values to false', (tester) async {
-      _answerGetEdge(tester, () => {'edge': 'left', 'statusBarHidden': true});
+      answerGetEdge(tester, () => {'edge': 'left', 'statusBarHidden': true});
       await _pump(tester);
       expect(_showsHidden(_left, hidden: true), findsOneWidget);
 
-      await _pushFromNative(tester, {'edge': 'right', 'statusBarHidden': false});
+      await pushFromNative(tester, {'edge': 'right', 'statusBarHidden': false});
       expect(_showsHidden(_right, hidden: false), findsOneWidget);
-      await _pushFromNative(tester, {'edge': 'left', 'statusBarHidden': true});
+      await pushFromNative(tester, {'edge': 'left', 'statusBarHidden': true});
       expect(_showsHidden(_left, hidden: true), findsOneWidget);
       // Missing visibility defaults to false; visibility changes apply even when the edge is unchanged.
-      await _pushFromNative(tester, {'edge': 'left'});
+      await pushFromNative(tester, {'edge': 'left'});
       expect(_showsHidden(_left, hidden: false), findsOneWidget);
       expect(_ProbeState.created, 1, reason: 'value changes preserve the widget tree structure');
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('iOS: stale sequences cannot overwrite status-bar visibility', (tester) async {
-      _answerGetEdge(tester, () => {'edge': 'right', 'statusBarHidden': false, 'sequence': 1});
+      answerGetEdge(tester, () => {'edge': 'right', 'statusBarHidden': false, 'sequence': 1});
       await _pump(tester);
-      await _pushFromNative(tester, {'edge': 'left', 'statusBarHidden': true, 'sequence': 3});
+      await pushFromNative(tester, {'edge': 'left', 'statusBarHidden': true, 'sequence': 3});
       expect(_showsHidden(_left, hidden: true), findsOneWidget);
       // Discard sequence 2 when it arrives after a newer payload.
-      await _pushFromNative(tester, {'edge': 'left', 'statusBarHidden': false, 'sequence': 2});
+      await pushFromNative(tester, {'edge': 'left', 'statusBarHidden': false, 'sequence': 2});
       expect(
         _showsHidden(_left, hidden: true),
         findsOneWidget,
@@ -265,38 +246,38 @@ void main() {
       );
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
-    // Native visibility can change without a vertical edge. Normalize it to avoid
+    // Native visibility can change without a vertical edge. Normalise it to avoid
     // delayed, visually irrelevant rebuilds when ordinary phones rotate.
     testWidgets('iOS: visibility-only changes do not notify descendants when edge is none', (tester) async {
-      _answerGetEdge(tester, () => {'edge': 'none', 'statusBarHidden': false, 'sequence': 1});
+      answerGetEdge(tester, () => {'edge': 'none', 'statusBarHidden': false, 'sequence': 1});
       await _pump(tester);
       final builds = _ProbeState.builds;
 
-      await _pushFromNative(tester, {'edge': 'none', 'statusBarHidden': true, 'sequence': 2});
+      await pushFromNative(tester, {'edge': 'none', 'statusBarHidden': true, 'sequence': 2});
       expect(_ProbeState.builds, builds, reason: 'visibility-only changes do not notify without a vertical edge');
       expect(
         _showsHidden(null, hidden: false),
         findsOneWidget,
         reason: 'visibility normalizes to false without a vertical edge',
       );
-      await _pushFromNative(tester, {'edge': 'none', 'statusBarHidden': false, 'sequence': 3});
+      await pushFromNative(tester, {'edge': 'none', 'statusBarHidden': false, 'sequence': 3});
       expect(_ProbeState.builds, builds);
 
-      // Normalized payloads still advance the sequence, so older values remain stale.
-      await _pushFromNative(tester, {'edge': 'left', 'statusBarHidden': true, 'sequence': 5});
+      // Normalised payloads still advance the sequence, so older values remain stale.
+      await pushFromNative(tester, {'edge': 'left', 'statusBarHidden': true, 'sequence': 5});
       expect(
         _showsHidden(_left, hidden: true),
         findsOneWidget,
         reason: 'visibility is exposed when a vertical edge exists',
       );
       expect(_ProbeState.builds, builds + 1);
-      await _pushFromNative(tester, {'edge': 'none', 'statusBarHidden': true, 'sequence': 4});
+      await pushFromNative(tester, {'edge': 'none', 'statusBarHidden': true, 'sequence': 4});
       expect(
         _showsHidden(_left, hidden: true),
         findsOneWidget,
         reason: 'stale sequence 4 must not overwrite sequence 5',
       );
-      await _pushFromNative(tester, {'edge': 'none', 'statusBarHidden': true, 'sequence': 6});
+      await pushFromNative(tester, {'edge': 'none', 'statusBarHidden': true, 'sequence': 6});
       expect(
         _showsHidden(null, hidden: false),
         findsOneWidget,
@@ -308,7 +289,7 @@ void main() {
     // even when window size and safe areas have not changed.
     testWidgets('iOS: resuming the app queries and applies the latest native value', (tester) async {
       Object? answer = {'edge': 'right', 'statusBarHidden': false, 'sequence': 1};
-      final calls = _answerGetEdge(tester, () => answer);
+      final calls = answerGetEdge(tester, () => answer);
       await _pump(tester);
       expect(calls, hasLength(1));
       expect(_showsHidden(_right, hidden: false), findsOneWidget);
@@ -329,15 +310,15 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('Android: resuming the app does not query native state', (tester) async {
-      final calls = _answerGetEdge(tester, () => {'edge': 'right'});
+      final calls = answerGetEdge(tester, () => {'edge': 'right'});
       await _pump(tester);
       await _moveLifecycle(tester, [AppLifecycleState.inactive, AppLifecycleState.resumed]);
       expect(calls, isEmpty);
     }, variant: TargetPlatformVariant.only(TargetPlatform.android));
 
-    // Replacement initializes the new State before disposing the old one at frame end.
+    // Replacement initialises the new State before disposing the old one at frame end.
     testWidgets('iOS: replacing the keyed widget preserves native events for the new owner', (tester) async {
-      _answerGetEdge(tester, () => {'edge': 'right'});
+      answerGetEdge(tester, () => {'edge': 'right'});
       await tester.pumpWidget(const VerticalBarEdge(key: ValueKey('a'), child: _Probe()));
       await tester.pump();
       await tester.pumpWidget(const VerticalBarEdge(key: ValueKey('b'), child: _Probe()));
@@ -345,7 +326,7 @@ void main() {
       expect(_ProbeState.created, 2, reason: 'precondition: State was replaced');
       expect(_shows(_right), findsOneWidget);
 
-      await _pushFromNative(tester, {'edge': 'left', 'sequence': 10});
+      await pushFromNative(tester, {'edge': 'left', 'sequence': 10});
       expect(_shows(_left), findsOneWidget, reason: 'disposing the old State must not remove the new owner handler');
 
       // Remove the handler when the final owner is disposed.
@@ -360,7 +341,7 @@ void main() {
     }, variant: TargetPlatformVariant.only(TargetPlatform.iOS));
 
     testWidgets('Android: keeps a null edge without querying native state', (tester) async {
-      final calls = _answerGetEdge(tester, () => {'edge': 'right'});
+      final calls = answerGetEdge(tester, () => {'edge': 'right'});
       await _pump(tester);
 
       expect(calls, isEmpty);
@@ -374,7 +355,7 @@ void main() {
     });
 
     testWidgets('disposing the widget removes its native event handler', (tester) async {
-      _answerGetEdge(tester, () => {'edge': 'right'});
+      answerGetEdge(tester, () => {'edge': 'right'});
       await _pump(tester);
 
       Future<ByteData?> deliver() async {

@@ -2,40 +2,7 @@ import 'package:duo_rail_kit/duo_rail_kit.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-/// Logical window size and OS safe areas, independent of application fixtures.
-/// Duo geometry is based on iOS 27.1 simulator measurements.
-typedef _Screen = ({Size size, EdgeInsets padding});
-
-/// Duo inner landscape.
-const _Screen _duoInner = (size: Size(951, 669), padding: EdgeInsets.only(right: 84, bottom: 34));
-
-/// Left Split View window: native edge on the left, without a status column.
-const _Screen _duoSplitLeft = (size: Size(469, 669), padding: EdgeInsets.only(bottom: 34));
-
-/// Duo outer landscape with the column on the left and the status bar hidden.
-const _Screen _duoOuterLandscapeLeft = (size: Size(678, 466), padding: EdgeInsets.only(left: 84, bottom: 34));
-
-/// Portrait iPad with a top status bar.
-const _Screen _iPad13Portrait = (size: Size(1032, 1376), padding: EdgeInsets.only(top: 32, bottom: 25));
-
-/// Landscape iPhone: two-sided safe areas exclude synthetic top padding.
-const _Screen _iPhone17Landscape = (size: Size(874, 402), padding: EdgeInsets.only(left: 62, right: 62, bottom: 20));
-
-/// Applies [screen] geometry and restores the test window at teardown.
-void _useScreen(WidgetTester tester, _Screen screen) {
-  final padding = FakeViewPadding(
-    left: screen.padding.left,
-    top: screen.padding.top,
-    right: screen.padding.right,
-    bottom: screen.padding.bottom,
-  );
-  tester.view
-    ..physicalSize = screen.size
-    ..devicePixelRatio = 1
-    ..padding = padding
-    ..viewPadding = padding;
-  addTearDown(tester.view.reset);
-}
+import 'support/duo_windows.dart';
 
 /// Example application rule: show a rail at a window width of 720 or more.
 bool _wideWindowShowsRail(double windowWidth) => windowWidth >= 720;
@@ -195,10 +162,10 @@ void main() {
     /// Reads both top-inset policies from one context/build to avoid stale values.
     Future<({EdgeInsets withTop, EdgeInsets withoutTop})> railSafeArea(
       WidgetTester tester,
-      _Screen device, {
+      DuoWindow device, {
       HorizontalEdge? edge,
     }) async {
-      _useScreen(tester, device);
+      useWindow(tester, device);
       EdgeInsets? withTop;
       EdgeInsets? withoutTop;
       await tester.pumpWidget(
@@ -221,11 +188,11 @@ void main() {
 
     testWidgets('Duo columns can keep the added 16-point top while preserving other OS insets', (tester) async {
       expect(
-        (await railSafeArea(tester, _duoInner, edge: HorizontalEdge.right)).withTop,
+        (await railSafeArea(tester, innerLandscape, edge: HorizontalEdge.right)).withTop,
         const EdgeInsets.fromLTRB(0, 16, 84, 34),
       );
       expect(
-        (await railSafeArea(tester, _duoOuterLandscapeLeft, edge: HorizontalEdge.left)).withTop,
+        (await railSafeArea(tester, outerLandscapeLeft, edge: HorizontalEdge.left)).withTop,
         const EdgeInsets.fromLTRB(84, 16, 0, 34),
         reason: 'a left column does not add padding on the column-free right edge',
       );
@@ -233,29 +200,29 @@ void main() {
 
     testWidgets('opting out of the added top restores all four OS insets for Duo columns', (tester) async {
       expect(
-        (await railSafeArea(tester, _duoInner, edge: HorizontalEdge.right)).withoutTop,
+        (await railSafeArea(tester, innerLandscape, edge: HorizontalEdge.right)).withoutTop,
         const EdgeInsets.only(right: 84, bottom: 34),
       );
       expect(
-        (await railSafeArea(tester, _duoOuterLandscapeLeft, edge: HorizontalEdge.left)).withoutTop,
+        (await railSafeArea(tester, outerLandscapeLeft, edge: HorizontalEdge.left)).withoutTop,
         const EdgeInsets.only(left: 84, bottom: 34),
       );
     });
 
     // The column-free left window gains top spacing for content, but the rail must not move.
     testWidgets('left Split View uses all four OS insets regardless of the added-top policy', (tester) async {
-      final result = await railSafeArea(tester, _duoSplitLeft, edge: HorizontalEdge.left);
+      final result = await railSafeArea(tester, leftWindow, edge: HorizontalEdge.left);
       expect(
         result.withTop,
-        _duoSplitLeft.padding,
+        leftWindow.padding,
         reason: 'the added top is excluded for a column-free window even when requested',
       );
-      expect(result.withoutTop, _duoSplitLeft.padding);
+      expect(result.withoutTop, leftWindow.padding);
     });
 
     testWidgets('both policies preserve all insets when SideStatusBarInsets adds nothing', (tester) async {
       // Unadjusted iPad and landscape iPhone safe areas must survive either policy.
-      for (final device in [_iPad13Portrait, _iPhone17Landscape]) {
+      for (final device in [iPadPortrait, iPhone17Landscape]) {
         final result = await railSafeArea(tester, device);
         expect(result.withTop, device.padding, reason: '${device.padding}: receivesAddedTop is true');
         expect(result.withoutTop, device.padding, reason: '${device.padding}: receivesAddedTop is false');
@@ -263,7 +230,7 @@ void main() {
     });
 
     testWidgets('missing SideStatusBarInsets ancestor leaves application insets unchanged', (tester) async {
-      _useScreen(tester, _duoInner);
+      useWindow(tester, innerLandscape);
       late EdgeInsets result;
       await tester.pumpWidget(
         MaterialApp(
@@ -275,7 +242,7 @@ void main() {
           ),
         ),
       );
-      expect(result, _duoInner.padding);
+      expect(result, innerLandscape.padding);
     });
   });
 
@@ -320,6 +287,37 @@ void main() {
       const splitLeft = RailPlacement(edge: HorizontalEdge.left, followsSystemBar: true);
       expect(splitLeft.occupiedWidth(const EdgeInsets.only(bottom: 34), width), 84);
     });
+
+    test('a systemRailWidth rail occupies 96 over the column and without one', () {
+      const width = RailPlacement.systemRailWidth;
+      expect(rightFollowing.occupiedWidth(const EdgeInsets.only(right: 84, bottom: 34), width), 96);
+      const leftColumn = RailPlacement(edge: HorizontalEdge.left, followsSystemBar: true, statusBarHidden: true);
+      expect(leftColumn.occupiedWidth(const EdgeInsets.only(left: 84, bottom: 34), width), 96);
+      const splitLeft = RailPlacement(edge: HorizontalEdge.left, followsSystemBar: true);
+      expect(splitLeft.occupiedWidth(const EdgeInsets.only(bottom: 34), width), 96);
+    });
+  });
+
+  group('RailPlacement.systemRailWidth', () {
+    test('systemRailWidth is 96', () {
+      expect(RailPlacement.systemRailWidth, 96);
+    });
+
+    for (final window in [
+      innerLandscape,
+      rightWindow,
+      outerPortrait,
+      outerLandscapeRight,
+      outerLandscapeLeft,
+      leftWindow,
+    ]) {
+      test('a systemRailWidth rail flush with its edge is centred on the vertical bar: ${window.name}', () {
+        final region = window.region!;
+        final centre = region.rect.center.dx;
+        final fromEdge = region.edge == HorizontalEdge.left ? centre : window.size.width - centre;
+        expect(fromEdge, RailPlacement.systemRailWidth / 2);
+      });
+    }
   });
 
   group('RailPlacement.centredRailSafeArea', () {

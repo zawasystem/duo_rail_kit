@@ -1,6 +1,6 @@
 name: duo_rail_kit
-description: Flutter layout helpers and an iOS plugin for system-directed side rails and safe-area spacing on iPhone Duo.
-version: 0.1.1
+description: Flutter layout helpers and an iOS plugin for system-directed side rails, vertical bar toolbars, and safe-area spacing on iPhone Duo.
+version: 0.2.0
 repository: https://github.com/zawasystem/duo_rail_kit
 issue_tracker: https://github.com/zawasystem/duo_rail_kit/issues
 topics:
@@ -11,6 +11,10 @@ topics:
 screenshots:
   - description: Example app on the iOS 27.2 Simulator with the rail in the right system column of the iPhone Duo inner display.
     path: doc/images/overview.png
+  - description: Example app on the iOS 27.2 Simulator with a pushed page's back control and actions in the vertical bar column of the iPhone Duo inner display.
+    path: doc/images/vertical-toolbar.png
+  - description: Example app on the iOS 27.2 Simulator with its app bar in the top band beside the status display of the iPhone Duo inner display in portrait.
+    path: doc/images/top-band.png
   - description: Example app on the iOS 27.2 Simulator with a right-hand rail on the iPhone Duo outer display.
     path: doc/images/duo-right.png
   - description: Example app on the iOS 27.2 Simulator as the left Split View app on iPhone Duo, with a left-hand rail.

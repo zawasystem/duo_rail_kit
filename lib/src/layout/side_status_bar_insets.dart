@@ -1,26 +1,23 @@
+/// @docImport 'rail_layout.dart';
+/// @docImport 'rail_placement.dart';
+library;
+
 import 'dart:math' as math;
 
 import 'package:flutter/widgets.dart';
 
-import 'vertical_bar_edge.dart';
+import '../edge/vertical_bar_edge.dart';
 
 /// Adds top safe-area spacing to windows with a side status bar.
 ///
-/// When the original top inset is zero, [applies] accepts either a single
-/// horizontal safe-area column or no horizontal insets with a native vertical
-/// edge. The latter includes the left Split View window. Two horizontal insets
-/// are excluded, even if a native edge is reported. This is a geometry rule,
-/// not a device-model check.
+/// Where [applies] holds for the OS padding, raises the top of MediaQuery's padding and viewPadding to at least
+/// [minTop], so AppBars, SafeAreas, dialogs, and sheets stay aligned; left, right, and bottom are unchanged. It is a
+/// geometry rule, not a device check. Rails read the OS values with [removeAdded], [RailPlacement.railSafeAreaOf], or
+/// [RailLayout.of].
 ///
-/// Raises the top of both MediaQuery padding and viewPadding to at least [minTop],
-/// keeping AppBars, SafeAreas, dialogs, and sheets aligned. Left, right, and bottom remain
-/// unchanged. Rails can opt out via [removeAdded] or `RailPlacement.railSafeAreaOf`.
-///
-/// Wrap the application once, inside [VerticalBarEdge]:
-/// `VerticalBarEdge(child: SideStatusBarInsets(child: ...))`.
-/// The native edge is initially null, so a column-free Split View window receives
-/// spacing only after the first native reply. A single-column shape can receive
-/// spacing immediately from its geometry. Other shapes are unchanged.
+/// Wrap the application once, inside [VerticalBarEdge]: `VerticalBarEdge(child: SideStatusBarInsets(child: ...))`.
+/// The native edge is null until the first native reply, so the column-free left Split View window gets its spacing
+/// only then; a window with one status column gets it from its geometry at once.
 class SideStatusBarInsets extends StatelessWidget {
   const SideStatusBarInsets({super.key, required this.child});
 
@@ -31,9 +28,8 @@ class SideStatusBarInsets extends StatelessWidget {
 
   /// Whether the original OS [padding] needs top spacing.
   ///
-  /// Requires a zero top inset and either exactly one horizontal inset, or no
-  /// horizontal insets with [systemBarEdge] true. Status-bar visibility does not
-  /// matter. Two horizontal insets are always excluded.
+  /// Requires a zero top inset and either exactly one horizontal inset, or none with [systemBarEdge] true (such as
+  /// the left Split View window). Two horizontal insets are always excluded; status bar visibility does not matter.
   static bool applies(EdgeInsets padding, {bool systemBarEdge = false}) =>
       padding.top == 0 &&
       (((padding.left > 0) != (padding.right > 0)) || (systemBarEdge && padding.left == 0 && padding.right == 0));
@@ -52,7 +48,7 @@ class SideStatusBarInsets extends StatelessWidget {
 
   /// Subtracts this wrapper's added inset from [padding], clamping at zero.
   ///
-  /// Use this for components such as rails that need the original OS safe area.
+  /// For components, such as rails, that need the OS safe area.
   static EdgeInsets removeAdded(BuildContext context, EdgeInsets padding) {
     final added = addedOf(context);
     return EdgeInsets.fromLTRB(
@@ -65,10 +61,8 @@ class SideStatusBarInsets extends StatelessWidget {
 
   /// Whether this wrapper added spacing above [context].
   ///
-  /// True does not imply a horizontal status column: a column-free left Split
-  /// View window also receives spacing. To detect a column, inspect the original
-  /// horizontal insets restored by [removeAdded]. The adjusted MediaQuery top
-  /// alone cannot tell whether spacing was added.
+  /// True does not imply a status column: the column-free left Split View window gets spacing too. To detect a
+  /// column, read the horizontal insets that [removeAdded] restores; the adjusted MediaQuery top cannot tell.
   static bool isActiveOf(BuildContext context) => addedOf(context) != EdgeInsets.zero;
 
   @override

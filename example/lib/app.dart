@@ -75,12 +75,19 @@ class DuoRailPreviewApp extends StatelessWidget {
     this.textScale = 1,
     this.viewInsets = EdgeInsets.zero,
     this.textDirection = TextDirection.ltr,
+    this.topBar,
+    this.verticalBar,
   });
 
   final Size size;
   final EdgeInsets safeArea;
   final HorizontalEdge? edge;
   final bool statusBarHidden;
+
+  /// Simulated system bar regions. They apply only when their view sizes match [size] and a [topBar]'s safeTop
+  /// matches the top safe area; otherwise the readout shows none and the app bar stays below the safe area.
+  final TopBarRegion? topBar;
+  final VerticalBarRegion? verticalBar;
   final String label;
   final double textScale;
   final EdgeInsets viewInsets;
@@ -104,7 +111,12 @@ class DuoRailPreviewApp extends StatelessWidget {
         child: VerticalBarEdgeScope(
           edge: edge,
           statusBarHidden: statusBarHidden,
-          child: SideStatusBarInsets(child: child ?? const SizedBox.shrink()),
+          // Same order as VerticalBarEdge builds: the edge scope, then the region scope.
+          child: BarRegionScope(
+            topBar: topBar,
+            verticalBar: verticalBar,
+            child: SideStatusBarInsets(child: child ?? const SizedBox.shrink()),
+          ),
         ),
       ),
     ),
@@ -112,10 +124,10 @@ class DuoRailPreviewApp extends StatelessWidget {
   );
 }
 
-const List<({IconData icon, IconData selectedIcon, String label})> _destinations = [
-  (icon: Icons.dashboard_outlined, selectedIcon: Icons.dashboard_rounded, label: 'Layout'),
-  (icon: Icons.touch_app_outlined, selectedIcon: Icons.touch_app_rounded, label: 'State'),
-  (icon: Icons.code_rounded, selectedIcon: Icons.code_rounded, label: 'About'),
+const List<({IconData icon, IconData selectedIcon, String label, String title})> _destinations = [
+  (icon: Icons.dashboard_outlined, selectedIcon: Icons.dashboard_rounded, label: 'Layout', title: 'Overview'),
+  (icon: Icons.touch_app_outlined, selectedIcon: Icons.touch_app_rounded, label: 'State', title: 'State lab'),
+  (icon: Icons.code_rounded, selectedIcon: Icons.code_rounded, label: 'About', title: 'About the kit'),
 ];
 
 class _DemoShell extends StatefulWidget {
@@ -126,70 +138,86 @@ class _DemoShell extends StatefulWidget {
   State<_DemoShell> createState() => _DemoShellState();
 }
 
+/// The numbers of rail tabs the State lab offers; tabs after the third are placeholders.
+const List<int> _railTabCounts = [3, 5, 6, 7];
+
 class _DemoShellState extends State<_DemoShell> {
   int _selected = 0;
+  int _railTabs = 3;
 
   @override
   Widget build(BuildContext context) {
     final data = MediaQuery.of(context);
-    final placement = RailPlacement.of(context, showsRailByWidth: (width) => width >= 600);
-    final railSafeArea = RailPlacement.railSafeAreaOf(context, receivesAddedTop: false);
-    final railWidth = placement?.followsSystemBar == true ? RailPlacement.statusColumnWidth : 80.0;
-    final occupiedWidth = placement?.occupiedWidth(railSafeArea, railWidth) ?? 0.0;
+    final rail = RailLayout.of(context, showsRailByWidth: (width) => width >= 600, railWidth: 80);
+    // The content pane in window coordinates, as TopBarRegion.paddingFor expects.
+    final pane = rail.contentRect(data.size);
     final metrics = _LayoutMetrics(
-      placement: placement,
-      occupiedWidth: occupiedWidth,
+      placement: rail.placement,
+      occupiedWidth: rail.occupiedWidth,
       top: data.padding.top,
       addedTop: SideStatusBarInsets.addedOf(context).top,
+      // Read where the window's top padding is intact; null on other screens and stale samples.
+      topBar: TopBarRegion.of(context),
+      verticalBar: VerticalBarRegion.of(context),
     );
     // Keep the content wrappers mounted to preserve state when placement changes.
     return Scaffold(
       resizeToAvoidBottomInset: false,
-      body: RailSideRow(
-        railEdge: placement?.edge,
+      body: VerticalBarShell(
+        railEdge: rail.edge,
+        // reservesBack stays false: the detail page is a root push with its own column, and reserving a back control
+        // would lower the rail on every tab.
         rail: SizedBox(
           key: const ValueKey('rail-column'),
-          width: occupiedWidth,
+          width: rail.occupiedWidth,
           child: Padding(
             padding: EdgeInsets.only(bottom: data.viewInsets.bottom),
-            child: MediaQuery(
-              data: data.copyWith(padding: placement?.centredRailSafeArea(railSafeArea) ?? railSafeArea),
-              child: NavigationRail(
-                key: const ValueKey('navigation-rail'),
-                selectedIndex: _selected,
-                onDestinationSelected: _select,
-                labelType: NavigationRailLabelType.all,
-                minWidth: railWidth,
-                groupAlignment: placement?.followsSystemBar == true ? 1 : 0,
-                scrollable: true,
-                destinations: [
-                  for (final destination in _destinations)
-                    NavigationRailDestination(
-                      icon: Icon(destination.icon),
-                      selectedIcon: Icon(destination.selectedIcon),
-                      label: Text(
-                        destination.label,
-                        maxLines: 1,
-                        softWrap: false,
-                        overflow: TextOverflow.ellipsis,
+            // railPaddingOf reads the shell above, so it needs a context below it.
+            child: Builder(
+              builder: (context) => MediaQuery(
+                data: data.copyWith(
+                  padding: VerticalBarShell.railPaddingOf(context, rail.centredSafeArea),
+                ),
+                child: NavigationRail(
+                  key: const ValueKey('navigation-rail'),
+                  selectedIndex: _selected,
+                  onDestinationSelected: _select,
+                  labelType: NavigationRailLabelType.all,
+                  minWidth: rail.width,
+                  groupAlignment: rail.followsSystemBar ? 1 : 0,
+                  scrollable: true,
+                  destinations: [
+                    for (final destination in _destinations)
+                      NavigationRailDestination(
+                        icon: Icon(destination.icon),
+                        selectedIcon: Icon(destination.selectedIcon),
+                        label: _railLabel(destination.label),
                       ),
-                    ),
-                ],
+                    for (var tab = _destinations.length + 1; tab <= _railTabs; tab++)
+                      NavigationRailDestination(
+                        icon: const Icon(Icons.crop_square_rounded),
+                        label: _railLabel('Tab $tab'),
+                        disabled: true,
+                      ),
+                  ],
+                  // Tells the shell where the destinations start, so the cells above them end 12 higher.
+                  trailing: const VerticalBarRailEnd(),
+                ),
               ),
             ),
           ),
         ),
         content: RailSideFab(
-          enabled: placement?.followsSystemBar ?? false,
+          enabled: rail.followsSystemBar,
           child: MediaQuery(
-            data: data.removePadding(
-              removeLeft: placement?.edge == HorizontalEdge.left,
-              removeRight: placement?.edge == HorizontalEdge.right,
-            ),
+            data: rail.removeRailEdge(data),
             child: _DemoContent(
               selected: _selected,
               onSelected: _select,
+              railTabs: _railTabs,
+              onRailTabsChanged: (value) => setState(() => _railTabs = value),
               metrics: metrics,
+              pane: pane,
               previewLabel: widget.previewLabel,
             ),
           ),
@@ -202,6 +230,8 @@ class _DemoShellState extends State<_DemoShell> {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() => _selected = value);
   }
+
+  static Widget _railLabel(String label) => Text(label, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis);
 }
 
 class _LayoutMetrics {
@@ -210,11 +240,15 @@ class _LayoutMetrics {
     required this.occupiedWidth,
     required this.top,
     required this.addedTop,
+    required this.topBar,
+    required this.verticalBar,
   });
   final RailPlacement? placement;
   final double occupiedWidth;
   final double top;
   final double addedTop;
+  final TopBarRegion? topBar;
+  final VerticalBarRegion? verticalBar;
 
   String get side => switch (placement?.edge) {
     HorizontalEdge.left => 'Left rail',
@@ -222,13 +256,51 @@ class _LayoutMetrics {
     null => 'Bottom bar',
   };
   String get source => placement?.followsSystemBar == true ? 'System edge' : 'Window width';
+
+  String get topBarSize => _sizeOf(topBar?.rect);
+  String get topBarDetail {
+    final region = topBar;
+    return region == null
+        ? 'No band beside the status bar'
+        : '${_position(region.rect)} · safe top ${_points(region.safeTop)}';
+  }
+
+  String get verticalBarSize => _sizeOf(verticalBar?.rect);
+  String get verticalBarDetail {
+    final region = verticalBar;
+    if (region == null) {
+      return 'No vertical bar region';
+    }
+    final topBarTop = region.topBarTop;
+    return '${region.edge == HorizontalEdge.left ? 'Left' : 'Right'} edge · ${_position(region.rect)}'
+        '${topBarTop == null ? '' : ' · top bar top ${_points(topBarTop)}'}';
+  }
+
+  static String _sizeOf(Rect? rect) => rect == null ? 'None' : '${_points(rect.width)} × ${_points(rect.height)} px';
+
+  static String _position(Rect rect) =>
+      'x ${_points(rect.left)}–${_points(rect.right)}, y ${_points(rect.top)}–${_points(rect.bottom)}';
+
+  /// Whole logical pixels without decimals; pixel-aligned fractions with one decimal.
+  static String _points(double value) => value == value.roundToDouble() ? '${value.toInt()}' : value.toStringAsFixed(1);
 }
 
 class _DemoContent extends StatefulWidget {
-  const _DemoContent({required this.selected, required this.onSelected, required this.metrics, this.previewLabel});
+  const _DemoContent({
+    required this.selected,
+    required this.onSelected,
+    required this.railTabs,
+    required this.onRailTabsChanged,
+    required this.metrics,
+    required this.pane,
+    this.previewLabel,
+  });
   final int selected;
   final ValueChanged<int> onSelected;
+  final int railTabs;
+  final ValueChanged<int> onRailTabsChanged;
   final _LayoutMetrics metrics;
+  final Rect pane;
   final String? previewLabel;
 
   @override
@@ -256,8 +328,49 @@ class _DemoContentState extends State<_DemoContent> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+  Widget build(BuildContext context) => VerticalBarPage(
+    // Beside a system rail with a vertical bar column, VerticalBarShell draws these in the column above the rail.
+    actions: [
+      VerticalBarAction(
+        id: 'reset-taps',
+        icon: const Icon(Icons.restart_alt_rounded),
+        label: 'Reset counter',
+        onPressed: (_) => _reset(),
+      ),
+      VerticalBarAction(
+        id: 'about',
+        icon: const Icon(Icons.info_outline_rounded),
+        label: 'About the kit',
+        onPressed: (_) => widget.onSelected(2),
+      ),
+    ],
+    builder: _scaffold,
+  );
+
+  Widget _scaffold(BuildContext context, VerticalBarSlots slots) => Scaffold(
     key: const ValueKey('content-scaffold'),
+    appBar: _DemoAppBar(
+      band: widget.metrics.topBar,
+      pane: widget.pane,
+      title: _destinations[widget.selected].title,
+      // As on the detail page: an iOS AppBar would centre the title once the actions leave it.
+      centerTitle: slots.active ? false : null,
+      actions: slots.active
+          ? const []
+          : [
+              IconButton(
+                key: const ValueKey('reset-taps'),
+                tooltip: 'Reset counter',
+                onPressed: _reset,
+                icon: const Icon(Icons.restart_alt_rounded),
+              ),
+              IconButton(
+                tooltip: 'About the kit',
+                onPressed: () => widget.onSelected(2),
+                icon: const Icon(Icons.info_outline_rounded),
+              ),
+            ],
+    ),
     floatingActionButtonLocation: RailSideFab.locationOf(context),
     floatingActionButton: FloatingActionButton(
       key: const ValueKey('add-tap'),
@@ -284,8 +397,9 @@ class _DemoContentState extends State<_DemoContent> {
             ],
           )
         : null,
-    // Keep the viewport inside the safe area so caret, focus and accessibility reveals stay clear of the status bar,
-    // but paint the content past it so the list is not clipped below the status bar or above the home indicator.
+    // The app bar keeps the viewport's top below it. SafeArea keeps the viewport above the bottom inset, so caret,
+    // focus and accessibility reveals stay clear of the home indicator, while the content is painted past it and is
+    // not clipped above the home indicator. Content scrolled up passes under the opaque app bar.
     body: SafeArea(
       child: SingleChildScrollView(
         key: const ValueKey('content-scroll'),
@@ -314,6 +428,12 @@ class _DemoContentState extends State<_DemoContent> {
   );
 
   void _increment() => setState(() => _taps++);
+
+  void _reset() => setState(() => _taps = 0);
+
+  void _openDetail() => Navigator.of(
+    context,
+  ).push(MaterialPageRoute<void>(builder: (context) => _DetailPage(previewLabel: widget.previewLabel)));
 
   Widget _overview() => Column(
     crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -345,6 +465,12 @@ class _DemoContentState extends State<_DemoContent> {
                   onPressed: () => widget.onSelected(1),
                   icon: const Icon(Icons.arrow_forward_rounded, size: 18),
                   label: const Text('Open state lab'),
+                ),
+                TextButton.icon(
+                  key: const ValueKey('open-detail'),
+                  onPressed: _openDetail,
+                  icon: const Icon(Icons.article_outlined, size: 18),
+                  label: const Text('Open detail'),
                 ),
               ],
             ),
@@ -387,7 +513,7 @@ class _DemoContentState extends State<_DemoContent> {
               runSpacing: 8,
               children: [
                 FilledButton.icon(onPressed: _increment, icon: const Icon(Icons.add), label: const Text('Add a tap')),
-                TextButton(onPressed: () => setState(() => _taps = 0), child: const Text('Reset counter')),
+                TextButton(onPressed: _reset, child: const Text('Reset counter')),
               ],
             ),
             const SizedBox(height: 24),
@@ -400,6 +526,31 @@ class _DemoContentState extends State<_DemoContent> {
             ),
             const SizedBox(height: 12),
             const Text('Kept in memory for this session only.', style: TextStyle(color: _muted, fontSize: 12)),
+          ],
+        ),
+      ),
+      const SizedBox(height: 16),
+      _Panel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _Eyebrow('RAIL TABS'),
+            const SizedBox(height: 12),
+            const Text(
+              'Add placeholder tabs to the rail. Beside a system rail, the actions in the vertical bar column above it '
+              'move to the overflow menu when they no longer fit.',
+              style: TextStyle(color: _muted, height: 1.5),
+            ),
+            const SizedBox(height: 16),
+            SegmentedButton<int>(
+              key: const ValueKey('rail-tabs'),
+              showSelectedIcon: false,
+              segments: [
+                for (final count in _railTabCounts) ButtonSegment<int>(value: count, label: Text('$count')),
+              ],
+              selected: {widget.railTabs},
+              onSelectionChanged: (selection) => widget.onRailTabsChanged(selection.single),
+            ),
           ],
         ),
       ),
@@ -428,17 +579,22 @@ class _DemoContentState extends State<_DemoContent> {
             _Rule(
               '03',
               'Share the status column',
-              'The system rail uses 84 pixels. centredRailSafeArea keeps controls clear of the status display.',
+              'The system rail uses 96 pixels. centredRailSafeArea keeps controls clear of the status display.',
             ),
             _Rule(
               '04',
               'Keep the tree steady',
-              'RailSideRow and RailSideFab always wrap the same content. Only their values change.',
+              'VerticalBarShell and RailSideFab always wrap the same content. Only their values change.',
             ),
             _Rule(
               '05',
               'Leave room for an action',
               'RailSideFab keeps the action 24 pixels above the content bottom beside a system rail.',
+            ),
+            _Rule(
+              '06',
+              'Use the band beside the status bar',
+              'Where TopBarRegion reports a band, the toolbar row moves into it. Elsewhere it sits below the safe area.',
             ),
           ],
         ),
@@ -448,6 +604,305 @@ class _DemoContentState extends State<_DemoContent> {
         'The native edge requires a supported iOS version and device. Other environments use width-based navigation. '
         'Status-bar visibility refreshes with geometry, traits, or app resume; it is not a continuous visibility stream.',
         style: TextStyle(color: _muted, height: 1.5),
+      ),
+    ],
+  );
+}
+
+/// The app bar of the content pane, and of the detail page with the whole window as its pane. Its toolbar row moves
+/// into the system's top band when one is reported.
+///
+/// The same widgets are built with or without a band; only padding and heights change, so the app bar and its
+/// actions, including their focus, are not recreated when a band appears or disappears.
+class _DemoAppBar extends StatelessWidget implements PreferredSizeWidget {
+  const _DemoAppBar({
+    required this.band,
+    required this.pane,
+    required this.title,
+    required this.actions,
+    this.automaticallyImplyLeading = true,
+    this.centerTitle,
+  });
+
+  /// Read with TopBarRegion.of where the window's top padding is intact.
+  final TopBarRegion? band;
+
+  /// The content pane in window coordinates.
+  final Rect pane;
+  final String title;
+  final List<Widget> actions;
+  final bool automaticallyImplyLeading;
+  final bool? centerTitle;
+
+  // The Scaffold adds the top safe area to this height. A band lies inside that area, so it adds nothing.
+  @override
+  Size get preferredSize => Size.fromHeight(band == null ? kToolbarHeight : 0);
+
+  @override
+  Widget build(BuildContext context) {
+    final band = this.band;
+    final data = MediaQuery.of(context);
+    return MediaQuery(
+      // AppBar pads its toolbar by the safe area; in the band, that padding places the row beside the status display.
+      data: band == null ? data : data.copyWith(padding: band.paddingFor(pane)),
+      child: AppBar(
+        automaticallyImplyLeading: automaticallyImplyLeading,
+        centerTitle: centerTitle,
+        toolbarHeight: band?.rect.height ?? kToolbarHeight,
+        backgroundColor: Colors.white,
+        surfaceTintColor: Colors.transparent,
+        scrolledUnderElevation: 0,
+        shape: const Border(bottom: BorderSide(color: _line)),
+        title: Text(title, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+        actions: [...actions, const SizedBox(width: 4)],
+      ),
+    );
+  }
+}
+
+/// Actions added by the More actions switch, for ten in all: in the inner landscape column, back, seven actions, and
+/// the overflow cell.
+const List<({String id, IconData icon, String label})> _extraActions = [
+  (id: 'copy-link', icon: Icons.link_rounded, label: 'Copy link'),
+  (id: 'bookmark', icon: Icons.bookmark_border_rounded, label: 'Bookmark'),
+  (id: 'download', icon: Icons.download_rounded, label: 'Download'),
+  (id: 'print', icon: Icons.print_outlined, label: 'Print'),
+  (id: 'edit', icon: Icons.edit_outlined, label: 'Edit'),
+  (id: 'archive', icon: Icons.archive_outlined, label: 'Archive'),
+  (id: 'report', icon: Icons.flag_outlined, label: 'Report'),
+];
+
+/// A full-window pushed page. Where iOS reports a vertical bar column, VerticalBarPage draws its back control and
+/// actions there, at UIKit's positions; elsewhere its app bar keeps them.
+class _DetailPage extends StatefulWidget {
+  const _DetailPage({this.previewLabel});
+  final String? previewLabel;
+
+  @override
+  State<_DetailPage> createState() => _DetailPageState();
+}
+
+class _DetailPageState extends State<_DetailPage> {
+  bool _favorite = false;
+  bool _moreActions = false;
+  String _lastAction = 'None yet';
+
+  @override
+  Widget build(BuildContext context) => VerticalBarPage(
+    // Stable ids keep each cell's state when actions are added or move to the overflow menu.
+    actions: [
+      VerticalBarAction(
+        id: 'share',
+        icon: const Icon(Icons.ios_share_rounded),
+        label: 'Share',
+        // The anchor is where a share sheet or popover opens from.
+        onPressed: (invocation) => _record('Share', invocation),
+      ),
+      VerticalBarAction(
+        id: 'favorite',
+        icon: Icon(_favorite ? Icons.star_rounded : Icons.star_outline_rounded),
+        label: 'Favorite',
+        selected: _favorite,
+        onPressed: (_) => _toggleFavorite(),
+      ),
+      VerticalBarAction(
+        id: 'manage',
+        icon: const Icon(Icons.tune_rounded),
+        label: 'Manage',
+        menuItems: [
+          VerticalBarMenuItem(
+            label: 'Delete',
+            icon: const Icon(Icons.delete_outline_rounded),
+            destructive: true,
+            onSelected: _delete,
+          ),
+        ],
+      ),
+      if (_moreActions)
+        for (final extra in _extraActions)
+          VerticalBarAction(
+            id: extra.id,
+            icon: Icon(extra.icon),
+            label: extra.label,
+            onPressed: (invocation) => _record(extra.label, invocation),
+          ),
+    ],
+    builder: (context, slots) => Scaffold(
+      appBar: _DemoAppBar(
+        // Read here, above the Scaffold, where the window's top padding is intact.
+        band: TopBarRegion.of(context),
+        pane: Offset.zero & MediaQuery.sizeOf(context),
+        title: 'Detail',
+        automaticallyImplyLeading: !slots.backInColumn,
+        // UIKit leaves the title at the leading edge; an iOS AppBar centres a title with fewer than two actions.
+        centerTitle: slots.active ? false : null,
+        // While the column is used, it holds every action, including those in its overflow menu.
+        actions: slots.active ? const [] : _appBarActions(),
+      ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          key: const ValueKey('detail-scroll'),
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 40),
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 1060),
+              child: _DetailBody(
+                previewLabel: widget.previewLabel,
+                inColumn: slots.active,
+                moreActions: _moreActions,
+                onMoreActionsChanged: (value) => setState(() => _moreActions = value),
+                lastAction: _lastAction,
+              ),
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  /// The same actions for the app bar, where no column applies.
+  List<Widget> _appBarActions() => [
+    IconButton(
+      tooltip: 'Share',
+      onPressed: () => _record('Share', null),
+      icon: const Icon(Icons.ios_share_rounded),
+    ),
+    IconButton(
+      tooltip: 'Favorite',
+      isSelected: _favorite,
+      onPressed: _toggleFavorite,
+      icon: Icon(_favorite ? Icons.star_rounded : Icons.star_outline_rounded),
+    ),
+    PopupMenuButton<void>(
+      tooltip: 'Manage',
+      icon: const Icon(Icons.tune_rounded),
+      itemBuilder: (context) => [
+        PopupMenuItem<void>(
+          onTap: _delete,
+          child: Text('Delete', style: TextStyle(color: Theme.of(context).colorScheme.error)),
+        ),
+      ],
+    ),
+    if (_moreActions)
+      PopupMenuButton<void>(
+        tooltip: 'More actions',
+        icon: const Icon(Icons.more_vert),
+        itemBuilder: (context) => [
+          for (final extra in _extraActions)
+            PopupMenuItem<void>(onTap: () => _record(extra.label, null), child: Text(extra.label)),
+        ],
+      ),
+  ];
+
+  /// Shows where [label] was invoked from: a column cell, the overflow cell, or the app bar (null).
+  void _record(String label, VerticalBarInvocation? invocation) => setState(() {
+    _lastAction = invocation == null
+        ? '$label from the app bar'
+        : '$label from ${_LayoutMetrics._position(invocation.anchor)}'
+              '${invocation.fromOverflowMenu ? ' via the overflow menu' : ''}';
+  });
+
+  void _toggleFavorite() => setState(() => _favorite = !_favorite);
+
+  void _delete() => ScaffoldMessenger.of(
+    context,
+  ).showSnackBar(const SnackBar(content: Text('Delete chosen. The example deletes nothing.')));
+}
+
+class _DetailBody extends StatefulWidget {
+  const _DetailBody({
+    required this.previewLabel,
+    required this.inColumn,
+    required this.moreActions,
+    required this.onMoreActionsChanged,
+    required this.lastAction,
+  });
+  final String? previewLabel;
+  final bool inColumn;
+  final bool moreActions;
+  final ValueChanged<bool> onMoreActionsChanged;
+  final String lastAction;
+
+  @override
+  State<_DetailBody> createState() => _DetailBodyState();
+}
+
+class _DetailBodyState extends State<_DetailBody> {
+  // Kept below VerticalBarPage, so it shows that the page keeps its state when the column appears or disappears.
+  int _taps = 0;
+
+  @override
+  Widget build(BuildContext context) => Column(
+    crossAxisAlignment: CrossAxisAlignment.stretch,
+    children: [
+      _Header(previewLabel: widget.previewLabel),
+      const SizedBox(height: 28),
+      _Panel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const _Eyebrow('PUSHED PAGE'),
+            const SizedBox(height: 12),
+            const Text('Back and actions follow the bar.', style: TextStyle(fontSize: 23, fontWeight: FontWeight.w700)),
+            const SizedBox(height: 8),
+            Text(
+              widget.inColumn
+                  ? 'They are in the vertical bar column, where UIKit puts them. The app bar keeps the title.'
+                  : 'No vertical bar column applies here, so they stay in the app bar.',
+              style: const TextStyle(color: _muted, height: 1.5),
+            ),
+            const SizedBox(height: 16),
+            Wrap(
+              spacing: 16,
+              runSpacing: 12,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              children: [
+                Text(
+                  '$_taps ${_taps == 1 ? 'tap' : 'taps'}',
+                  key: const ValueKey('detail-taps'),
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: _teal),
+                ),
+                FilledButton.icon(
+                  key: const ValueKey('detail-add-tap'),
+                  onPressed: () => setState(() => _taps++),
+                  icon: const Icon(Icons.add),
+                  label: const Text('Add a tap'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+      const SizedBox(height: 16),
+      _Panel(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Its own Material, so that the tile's ink shows above the panel's background.
+            Material(
+              type: MaterialType.transparency,
+              child: SwitchListTile(
+                key: const ValueKey('more-actions'),
+                contentPadding: EdgeInsets.zero,
+                value: widget.moreActions,
+                onChanged: widget.onMoreActionsChanged,
+                title: const Text('More actions', style: TextStyle(fontWeight: FontWeight.w700)),
+                subtitle: const Text(
+                  'Ten actions in all. Those that do not fit move to an overflow menu.',
+                  style: TextStyle(color: _muted),
+                ),
+              ),
+            ),
+            const SizedBox(height: 12),
+            const _Eyebrow('LAST ACTION'),
+            const SizedBox(height: 7),
+            Text(
+              widget.lastAction,
+              key: const ValueKey('last-action'),
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+          ],
+        ),
       ),
     ],
   );
@@ -526,13 +981,38 @@ class _HeroCard extends StatelessWidget {
   const _HeroCard({required this.placement});
   final RailPlacement? placement;
 
+  static const _oneLineTitle = 'At home on every edge.';
+
+  static bool _fitsOneLine(BuildContext context, String text, TextStyle style, double width) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: DefaultTextStyle.of(context).style.merge(style)),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final fits = !painter.didExceedMaxLines && painter.width <= width;
+    painter.dispose();
+    return fits;
+  }
+
   @override
   Widget build(BuildContext context) => Container(
     padding: const EdgeInsets.all(24),
     decoration: BoxDecoration(color: _ink, borderRadius: BorderRadius.circular(24)),
     child: LayoutBuilder(
       builder: (context, constraints) {
-        final roomy = constraints.maxWidth >= 560 && MediaQuery.textScalerOf(context).scale(1) < 1.5;
+        final scaler = MediaQuery.textScalerOf(context);
+        final roomy = constraints.maxWidth >= 560 && scaler.scale(1) < 1.5;
+        final titleStyle = TextStyle(
+          fontSize: roomy ? 40 : 32,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
+          height: 1.1,
+          letterSpacing: -0.8,
+        );
+        // Wide panes drop the forced line breaks where the title fits on one line in the platform font, and use a
+        // shorter sketch, so a short landscape window such as the Duo inner display still shows the metrics.
+        final oneLine = roomy && _fitsOneLine(context, _oneLineTitle, titleStyle, constraints.maxWidth - 232);
         final words = Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -540,21 +1020,14 @@ class _HeroCard extends StatelessWidget {
               'BUILT FOR THE EDGES',
               style: TextStyle(fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.8, color: Color(0xFF82D5C0)),
             ),
-            const SizedBox(height: 14),
+            SizedBox(height: oneLine ? 10 : 14),
+            Text(oneLine ? _oneLineTitle : 'At home\non every edge.', style: titleStyle),
+            SizedBox(height: oneLine ? 12 : 16),
             Text(
-              'At home\non every edge.',
-              style: TextStyle(
-                fontSize: roomy ? 40 : 32,
-                fontWeight: FontWeight.w700,
-                color: Colors.white,
-                height: 1.1,
-                letterSpacing: -0.8,
-              ),
-            ),
-            const SizedBox(height: 16),
-            const Text(
-              'One shared layout.\nThe system sets the side.',
-              style: TextStyle(color: Color(0xFFB5CCCF), height: 1.5),
+              oneLine
+                  ? 'One shared layout. The system sets the side.'
+                  : 'One shared layout.\nThe system sets the side.',
+              style: const TextStyle(color: Color(0xFFB5CCCF), height: 1.5),
             ),
           ],
         );
@@ -563,7 +1036,7 @@ class _HeroCard extends StatelessWidget {
                 children: [
                   Expanded(child: words),
                   const SizedBox(width: 32),
-                  _LayoutSketch(edge: placement?.edge),
+                  _LayoutSketch(edge: placement?.edge, height: oneLine ? 104 : 158),
                 ],
               )
             : words;
@@ -573,12 +1046,17 @@ class _HeroCard extends StatelessWidget {
 }
 
 class _LayoutSketch extends StatelessWidget {
-  const _LayoutSketch({required this.edge});
+  const _LayoutSketch({required this.edge, required this.height});
   final HorizontalEdge? edge;
+  final double height;
 
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
-    child: SizedBox(width: 200, height: 158, child: CustomPaint(painter: _LayoutSketchPainter(edge))),
+    child: SizedBox(
+      width: 200,
+      height: height,
+      child: CustomPaint(painter: _LayoutSketchPainter(edge)),
+    ),
   );
 }
 
@@ -599,28 +1077,31 @@ class _LayoutSketchPainter extends CustomPainter {
     canvas.drawRRect(RRect.fromRectAndRadius(rail, const Radius.circular(9)), paint..color = const Color(0xFF82D5C0));
     final left = edge == HorizontalEdge.left ? 47.0 : 15.0;
     final width = size.width - (edge == null ? 30 : 62);
+    // The page lines fill the space beside or above the rail.
+    const top = 16.0;
+    final span = (edge == null ? rail.top - 8 : size.height - 14) - top;
     canvas
       ..drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(left, 18, width * 0.6, 7), const Radius.circular(3)),
+        RRect.fromRectAndRadius(Rect.fromLTWH(left, top, width * 0.6, 6), const Radius.circular(3)),
         paint..color = const Color(0xFF8DA9AF),
       )
       ..drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(left, 39, width, 45), const Radius.circular(8)),
+        RRect.fromRectAndRadius(Rect.fromLTWH(left, top + span * 0.18, width, span * 0.36), const Radius.circular(8)),
         paint..color = const Color(0xFF476670),
       );
     for (var i = 0; i < 3; i++) {
       final center = edge == null
           ? Offset(rail.left + 35 + i * 56, rail.center.dy)
-          : Offset(rail.center.dx, rail.bottom - 22 - i * 36);
+          : Offset(rail.center.dx, rail.bottom - 18 - i * (rail.height - 36) / 2);
       canvas.drawCircle(center, 4, paint..color = _teal);
     }
     canvas
       ..drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(left, 95, width * 0.72, 5), const Radius.circular(3)),
+        RRect.fromRectAndRadius(Rect.fromLTWH(left, top + span * 0.68, width * 0.72, 5), const Radius.circular(3)),
         paint..color = const Color(0xFF617E86),
       )
       ..drawRRect(
-        RRect.fromRectAndRadius(Rect.fromLTWH(left, 108, width * 0.48, 5), const Radius.circular(3)),
+        RRect.fromRectAndRadius(Rect.fromLTWH(left, top + span * 0.84, width * 0.48, 5), const Radius.circular(3)),
         paint,
       );
   }
@@ -629,6 +1110,8 @@ class _LayoutSketchPainter extends CustomPainter {
   bool shouldRepaint(_LayoutSketchPainter oldDelegate) => oldDelegate.edge != edge;
 }
 
+const _minMetricWidth = 220.0;
+
 class _MetricsCards extends StatelessWidget {
   const _MetricsCards({required this.metrics});
   final _LayoutMetrics metrics;
@@ -636,7 +1119,10 @@ class _MetricsCards extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
-      final columns = constraints.maxWidth >= 540 && MediaQuery.textScalerOf(context).scale(1) < 1.5 ? 3 : 1;
+      // Up to three columns, each at least 220 wide so a value such as '509 × 48 px' stays on one line.
+      final columns = MediaQuery.textScalerOf(context).scale(1) < 1.5
+          ? ((constraints.maxWidth + 12) ~/ (_minMetricWidth + 12)).clamp(1, 3)
+          : 1;
       final width = (constraints.maxWidth - (columns - 1) * 12) / columns;
       return Wrap(
         spacing: 12,
@@ -664,6 +1150,20 @@ class _MetricsCards extends StatelessWidget {
             detail: metrics.addedTop > 0
                 ? '${metrics.addedTop.toInt()} px added for breathing room'
                 : 'Environment inset preserved',
+          ),
+          _Metric(
+            width: width,
+            icon: Icons.border_top_rounded,
+            title: 'TOP BAR REGION',
+            value: metrics.topBarSize,
+            detail: metrics.topBarDetail,
+          ),
+          _Metric(
+            width: width,
+            icon: Icons.border_vertical_rounded,
+            title: 'VERTICAL BAR REGION',
+            value: metrics.verticalBarSize,
+            detail: metrics.verticalBarDetail,
           ),
         ],
       );

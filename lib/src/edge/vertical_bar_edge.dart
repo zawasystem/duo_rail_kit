@@ -2,23 +2,19 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 
-/// A physical screen edge, independent of text direction.
-enum HorizontalEdge { left, right }
+import '../core/horizontal_edge.dart';
+import 'bar_regions.dart';
 
-/// Exposes the native edge for vertical navigation bars on iPhone Duo.
+/// Exposes the native edge for vertical navigation bars on iPhone Duo, with the system bar regions sampled with it.
 ///
-/// Reads iOS 27.1's `UITraitCollection.verticalBarEdge` through the plugin. Outer
-/// portrait and inner landscape use the right edge; outer landscape can use
-/// either edge; Split View uses each window's outer edge. Environments without
-/// a vertical bar report null and can use an application-defined width fallback.
+/// Reads iOS 27.1's `UITraitCollection.verticalBarEdge` through the plugin, from native trait events and from queries
+/// when the window size or view padding changes and when the app resumes. Where there is no vertical bar the edge is
+/// null, and an application can fall back to a width rule. Edges are physical left/right: UIKit's leading/trailing is
+/// converted with its layout direction, so right-to-left text does not swap them.
 ///
-/// Receives native trait events and queries again when window size or viewPadding
-/// changes, and when the app resumes. Wrap the application once, outside
-/// `SideStatusBarInsets`, which also needs the edge:
-/// `VerticalBarEdge(child: SideStatusBarInsets(child: ...))`.
-///
-/// Edges are physical left/right. Native leading/trailing values are converted
-/// using UIKit's layout direction, so RTL does not swap the reported edges.
+/// Wrap the application once, outside `SideStatusBarInsets`, which also needs the edge:
+/// `VerticalBarEdge(child: SideStatusBarInsets(child: ...))`. Read the values with [of], [statusBarHiddenOf],
+/// [TopBarRegion.of], and [VerticalBarRegion.of].
 class VerticalBarEdge extends StatefulWidget {
   const VerticalBarEdge({super.key, required this.child});
 
@@ -42,23 +38,16 @@ class VerticalBarEdge extends StatefulWidget {
   static HorizontalEdge? of(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<VerticalBarEdgeScope>()?.edge;
 
-  /// Whether the native status bar is hidden.
+  /// Whether the native status bar is hidden, which decides whether the status column shows the status display.
   ///
-  /// Used to decide whether the side column contains a status display. Unknown
-  /// values, unsupported environments, and missing scopes default to false.
-  /// [VerticalBarEdge] also resets this to false when there is no vertical edge.
-  ///
-  /// This is a sampled value, not an independent visibility stream. Native code
-  /// reads it on queries and trait changes; Dart queries on size/viewPadding
-  /// changes and app resume. A visibility-only change can remain stale until
-  /// the next refresh.
+  /// False without a vertical edge, for an unknown value, on other platforms, and without a scope. It is sampled with
+  /// the edge, on queries and trait changes, so a change of visibility alone can stay stale until the next one.
   static bool statusBarHiddenOf(BuildContext context) =>
       context.dependOnInheritedWidgetOfExactType<VerticalBarEdgeScope>()?.statusBarHidden ?? false;
 
-  /// Parses the edge from a native payload.
+  /// Parses the edge from a native payload; an unknown value or payload shape gives null.
   ///
-  /// Payload: `{edge: "left" | "right" | "none", statusBarHidden: bool, sequence: int}`.
-  /// Unknown values or payload shapes return null.
+  /// Payload: `{edge: "left" | "right" | "none", statusBarHidden: bool, sequence: int, topBar?, verticalBar?}`.
   @visibleForTesting
   static HorizontalEdge? parse(Object? value) => value is Map
       ? switch (value['edge']) {
@@ -68,7 +57,7 @@ class VerticalBarEdge extends StatefulWidget {
         }
       : null;
 
-  /// Parses status-bar visibility; missing or non-boolean values return false.
+  /// Parses status bar visibility; missing or non-boolean values return false.
   @visibleForTesting
   static bool parseStatusBarHidden(Object? value) => value is Map && value['statusBarHidden'] == true;
 
@@ -77,16 +66,11 @@ class VerticalBarEdge extends StatefulWidget {
 }
 
 class _VerticalBarEdgeState extends State<VerticalBarEdge> with WidgetsBindingObserver {
-  /// The state that owns the channel's single method-call handler.
-  ///
-  /// A replacement state's initState can run before the old state's dispose.
-  /// Only the current owner may remove the handler, or new events would be lost.
+  /// The channel handler's owner; only it removes the handler, as a new state's initState can precede the old dispose.
   static _VerticalBarEdgeState? _channelOwner;
 
-  HorizontalEdge? _edge;
-
-  /// Visibility sampled and ordered together with the edge value.
-  bool _statusBarHidden = false;
+  /// The applied sample: the edge with the visibility and bar regions parsed and ordered together with it.
+  _Sample _sample = (edge: null, statusBarHidden: false, topBar: null, verticalBar: null);
 
   /// The last applied native sequence number; used to reject stale updates.
   int _sequence = 0;
@@ -139,7 +123,6 @@ class _VerticalBarEdgeState extends State<VerticalBarEdge> with WidgetsBindingOb
     if (_observingLifecycle) {
       WidgetsBinding.instance.removeObserver(this);
     }
-    // A replacement state may already own the handler when this state disposes.
     if (identical(_channelOwner, this)) {
       _channelOwner = null;
       VerticalBarEdge.channel.setMethodCallHandler(null);
@@ -166,12 +149,12 @@ class _VerticalBarEdgeState extends State<VerticalBarEdge> with WidgetsBindingOb
     }
   }
 
-  /// Applies a native value while rejecting duplicate or older sequence numbers.
+  /// Applies a native payload, dropping one whose sequence number is not newer than the last applied one.
   ///
-  /// Query replies and trait events may arrive out of creation order. Payloads
-  /// without a sequence number remain compatible and use arrival order.
-  /// When there is no vertical edge, normalize visibility to false to avoid
-  /// irrelevant rebuilds on ordinary devices that hide their status bar.
+  /// * Query replies and trait events can arrive out of order; a payload without a sequence number applies in
+  ///   arrival order.
+  /// * Without an edge, visibility is false, so devices that hide their status bar do not rebuild for it. The top bar
+  ///   region is kept: Duo inner portrait has one without an edge.
   void _apply(Object? value) {
     if (!mounted) {
       return;
@@ -184,21 +167,30 @@ class _VerticalBarEdgeState extends State<VerticalBarEdge> with WidgetsBindingOb
       _sequence = sequence;
     }
     final edge = VerticalBarEdge.parse(value);
-    final statusBarHidden = edge != null && VerticalBarEdge.parseStatusBarHidden(value);
-    if (edge == _edge && statusBarHidden == _statusBarHidden) {
+    final sample = (
+      edge: edge,
+      statusBarHidden: edge != null && VerticalBarEdge.parseStatusBarHidden(value),
+      topBar: parseTopBarRegion(value),
+      verticalBar: parseVerticalBarRegion(value, edge),
+    );
+    if (sample == _sample) {
       return;
     }
-    setState(() {
-      _edge = edge;
-      _statusBarHidden = statusBarHidden;
-    });
+    setState(() => _sample = sample);
   }
 
-  // Keep the inherited scope mounted so edge changes preserve descendant state.
+  // Keep both inherited scopes mounted so value changes preserve descendant state.
+  // The scopes notify separately: a region-only change does not rebuild edge dependants.
   @override
-  Widget build(BuildContext context) =>
-      VerticalBarEdgeScope(edge: _edge, statusBarHidden: _statusBarHidden, child: widget.child);
+  Widget build(BuildContext context) => VerticalBarEdgeScope(
+    edge: _sample.edge,
+    statusBarHidden: _sample.statusBarHidden,
+    child: BarRegionScope(topBar: _sample.topBar, verticalBar: _sample.verticalBar, child: widget.child),
+  );
 }
+
+/// One native payload as [_VerticalBarEdgeState] applies it.
+typedef _Sample = ({HorizontalEdge? edge, bool statusBarHidden, TopBarRegion? topBar, VerticalBarRegion? verticalBar});
 
 /// Provides edge values to descendants; tests can inject a scope directly.
 class VerticalBarEdgeScope extends InheritedWidget {
@@ -207,7 +199,7 @@ class VerticalBarEdgeScope extends InheritedWidget {
   /// The physical native edge, or null when no vertical bar is used.
   final HorizontalEdge? edge;
 
-  /// Sampled status-bar visibility; see [VerticalBarEdge.statusBarHiddenOf].
+  /// Sampled status bar visibility; see [VerticalBarEdge.statusBarHiddenOf].
   final bool statusBarHidden;
 
   @override
