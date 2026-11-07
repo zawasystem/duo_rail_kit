@@ -15,6 +15,7 @@ and tags stay fixed: use a new version for later changes and never move a tag.
 | `0.1.0` | Git tag only | `b21e358959c31e077f062ff4aa8d387c5e1ea764` |
 | `0.1.1` | Published manually on 2026-11-01; verified publisher `zawasystem.com` | [tag `0.1.1`](https://github.com/zawasystem/duo_rail_kit/releases/tag/0.1.1), `fc3b2e09ad693bee0c075d0f9f41c61df7d621f9` |
 | `0.2.0` | Published by the GitHub Actions workflow on 2026-11-07 (JST); verified publisher `zawasystem.com` | [tag `0.2.0`](https://github.com/zawasystem/duo_rail_kit/releases/tag/0.2.0), `454b4cfbbef9a774678619b571b0e1e0a2dd1ec8` |
+| `0.2.1` | Published by the GitHub Actions workflow on 2026-11-07 (JST), verified publisher `zawasystem.com` | [tag `0.2.1`](https://github.com/zawasystem/duo_rail_kit/tree/0.2.1), `377ca44680fb65216b83359e1bccbf9f26331f5b` |
 
 ## Release-candidate checks
 
