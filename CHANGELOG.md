@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.1
+
+- Update vertical toolbar positions when UIKit moves a side bar layout guide,
+  including changes that leave the top guide and the window size unchanged.
+
 ## 0.2.0
 
 - Add `TopBarRegion`, `VerticalBarRegion`, and `BarRegionScope`: the system's

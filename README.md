@@ -37,7 +37,7 @@ Flutter iOS host.
 
 ```yaml
 dependencies:
-  duo_rail_kit: ^0.2.0
+  duo_rail_kit: ^0.2.1
 ```
 
 Run `flutter pub get` and commit `pubspec.lock`. API docs are on
@@ -332,8 +332,9 @@ do.
 
 - The first frame, and every frame without the plugin, has no native edge and
   uses the width rule, so Dart tests do not prove native registration.
-- Regions are sampled with the edge and when the top bar layout guide moves,
-  not when only the vertical bar region moves.
+- The plugin samples regions with the edge and when the top or side bar layout
+  guides move. A change to the active side's item region updates the toolbar
+  even when the window size and safe-area insets stay the same.
 - While the Duo inner display rotates, `VerticalBarRegion.of` can return a
   mixed portrait region for a frame ([measured values](#measured-values)),
   which `VerticalBarColumn` rejects; `TopBarRegion.of` accepts a mixed band only
@@ -346,6 +347,10 @@ do.
 Checked on the iOS 27.2 Simulator only; iOS 27.1 and devices are unchecked:
 
 - Region output ([measured values](#measured-values)).
+- On the outer display in portrait, the background location indicator moved
+  the right item region's top from 174 to 218⅓ points. It returned to 174 when
+  location updates stopped. The window size, safe-area insets and top guide
+  stayed the same.
 - The example's detail page matched UIKit's cells (icons within 3) on inner
   landscape and the right Split View window, kept its controls in the app bar
   elsewhere on the inner display and iPhone 17, and used the column on the

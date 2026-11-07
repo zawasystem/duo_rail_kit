@@ -130,10 +130,10 @@ void main() {
       reason: 'bar(onEdge:extent:) is the iOS 27.1 API; an unqualified .top is ambiguous with directional edges',
     );
     expect(source, contains('static let barExtent: CGFloat = 48'), reason: 'The row matches the 27.2 default extent');
-    // Both the payload and the probe must check the idiom; one check does not cover the other.
+    // Sampling and observation both need the phone idiom check.
     for (final signature in [
       'static func value(of viewController: UIViewController?)',
-      'private func attachRegionProbe(to view: UIView?)',
+      'private func attachRegionProbes(to view: UIView?)',
     ]) {
       expect(
         functionBody(source, signature),
@@ -169,7 +169,7 @@ void main() {
     expect(
       verticalBar,
       isNot(contains('layoutGuide(for:')),
-      reason: 'Regions are read with edgeInsets(for:); the probe already follows the top bar guide',
+      reason: 'Sampling region insets must not install another guide',
     );
     expect(
       RegExp(r'layoutGuide\(for:').allMatches(source),
@@ -178,7 +178,7 @@ void main() {
     );
   });
 
-  test('Swift creates the top bar layout guide only while installing its probe', () {
+  test('Swift creates bar layout guides only while installing their probes', () {
     final source = code();
     expect(
       RegExp(r'\.layoutGuide\(for:').allMatches(source),

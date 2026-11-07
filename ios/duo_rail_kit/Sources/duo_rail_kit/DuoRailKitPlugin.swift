@@ -4,8 +4,8 @@ import UIKit
 /// Bridges Flutter custom rails to `UITraitCollection.verticalBarEdge` and the system bar layout
 /// regions (iOS 27.1+).
 ///
-/// Answers `getEdge`, and sends `edgeChanged` when a trait change or a move of the top bar layout
-/// guide changes the payload; the README's native channel table lists the payload keys and when
+/// Answers `getEdge`, and sends `edgeChanged` when a trait change or a move of a top or side bar
+/// layout guide changes the payload; the README's native channel table lists the payload keys and when
 /// each is present. Observation starts on `getEdge`, because the Flutter view controller may not
 /// exist at registration. Every reply and event keeps these invariants:
 /// - `edge` and the regions use physical left/right: leading/trailing is converted with the layout
@@ -30,9 +30,10 @@ public final class DuoRailKitPlugin: NSObject, FlutterPlugin {
 
   /// Reattach observation when the Flutter view controller changes.
   private weak var observedViewController: UIViewController?
+  private var stopObservingTraits: (@MainActor () -> Void)?
 
-  /// The probe following the observed view's top bar layout guide; its superview owns it.
-  private weak var regionProbe: BarRegionProbeView?
+  /// The view that owns the probes for its top and side bar layout guides.
+  private weak var observedRegionView: UIView?
 
   /// Whether a probe-triggered refresh is already scheduled.
   private var regionRefreshScheduled = false
@@ -96,31 +97,34 @@ public final class DuoRailKitPlugin: NSObject, FlutterPlugin {
 
   @MainActor
   private func observe(_ viewController: UIViewController?) {
-    guard #available(iOS 27.1, *), let viewController else { return }
-    // `value(of:)` may load the view after this call; attaching on every query is idempotent.
-    attachRegionProbe(to: viewController.viewIfLoaded)
+    guard #available(iOS 27.1, *) else { return }
+    // The first query also samples this view, even if it has not been loaded yet.
+    attachRegionProbes(to: viewController?.view)
     guard viewController !== observedViewController else { return }
+    stopObservingTraits?()
+    stopObservingTraits = nil
     observedViewController = viewController
-    // UIKit ties observation to the view controller lifetime; no explicit cancellation token is needed.
-    viewController.registerForTraitChanges(UITraitCollection.systemTraitsAffectingVerticalBarEdge) {
+    guard let viewController else { return }
+    let registration = viewController.registerForTraitChanges(UITraitCollection.systemTraitsAffectingVerticalBarEdge) {
       [weak self] (changed: UIViewController, _: UITraitCollection) in
-      self?.send(Self.value(of: changed))
+      guard let self, changed === self.observedViewController else { return }
+      self.send(Self.value(of: changed))
     }
+    stopObservingTraits = { [weak viewController] in viewController?.unregisterForTraitChanges(registration) }
   }
 
-  /// Routes the probe of `view` to this plugin, installing it if the view has none.
-  ///
-  /// The previous view's probe stays installed with its callback cleared, so returning to that
-  /// view reuses that probe and its guide.
+  /// Returning to a view reuses its guides. Probes in the previous view no longer send updates.
   @available(iOS 27.1, *)
   @MainActor
-  private func attachRegionProbe(to view: UIView?) {
-    guard let view, view.traitCollection.userInterfaceIdiom == .phone else { return }
-    if let probe = regionProbe, probe.superview === view { return }
-    regionProbe?.onRegionChange = nil
-    let probe = BarRegionProbeView.existing(in: view) ?? BarRegionProbeView.install(in: view)
-    probe.onRegionChange = { [weak self] in self?.scheduleRegionRefresh() }
-    regionProbe = probe
+  private func attachRegionProbes(to view: UIView?) {
+    let phoneView = view.flatMap { $0.traitCollection.userInterfaceIdiom == .phone ? $0 : nil }
+    guard observedRegionView !== phoneView else { return }
+    if let previous = observedRegionView {
+      BarRegionProbeView.stopObserving(in: previous)
+    }
+    observedRegionView = phoneView
+    guard let phoneView else { return }
+    BarRegionProbeView.observe(in: phoneView) { [weak self] in self?.scheduleRegionRefresh() }
   }
 
   /// Recomputes the payload after the layout pass that moved the probe.
@@ -277,15 +281,14 @@ extension DuoRailKitPlugin {
 
 // MARK: - Probe
 
-/// A hidden, non-interactive view that follows its superview's top bar layout guide.
+/// A hidden, non-interactive view that follows one physical bar layout guide.
 ///
-/// The guide also drives `verticalBar`'s `topBarTop`, so no other probe is needed for it.
-/// UIKit may move the region without a trait or window-size change, for example if the status
-/// display widens during a call, screen recording, or hotspot use. Any frame change triggers a
-/// recomputed, deduplicated payload. One probe, and therefore one guide, is installed per view.
-private final class BarRegionProbeView: UIView {
+/// UIKit can move a side guide while the top guide, active edge and window size stay unchanged.
+final class BarRegionProbeView: UIView {
+  private(set) var edge: UIRectEdge = []
+
   /// Called on the main thread when UIKit moves or resizes the probe; must not retain the plugin.
-  var onRegionChange: (@MainActor () -> Void)?
+  private var onRegionChange: (@MainActor () -> Void)?
 
   // Auto Layout applies frames through `center` and `bounds`, not `frame`.
   override var bounds: CGRect {
@@ -302,21 +305,42 @@ private final class BarRegionProbeView: UIView {
 
   override func hitTest(_ point: CGPoint, with event: UIEvent?) -> UIView? { nil }
 
-  static func existing(in view: UIView) -> BarRegionProbeView? {
-    view.subviews.lazy.compactMap { $0 as? BarRegionProbeView }.first
+  private static func existing(in view: UIView) -> [BarRegionProbeView] {
+    view.subviews.compactMap { $0 as? BarRegionProbeView }
   }
 
   @available(iOS 27.1, *)
-  static func install(in view: UIView) -> BarRegionProbeView {
+  static func observe(
+    in view: UIView,
+    guideForEdge: @MainActor (UIView, UIRectEdge) -> UILayoutGuide = { view, edge in
+      view.layoutGuide(for: .bar(onEdge: edge, extent: DuoRailKitPlugin.barExtent))
+    },
+    onChange: @escaping @MainActor () -> Void
+  ) {
+    let probes = existing(in: view)
+    for edge in [UIRectEdge.top, .left, .right] {
+      // UIKit can create a guide on each lookup, so request it only for a new probe.
+      let probe = probes.first { $0.edge == edge } ?? install(in: view, edge: edge, guide: guideForEdge(view, edge))
+      probe.onRegionChange = onChange
+    }
+  }
+
+  static func stopObserving(in view: UIView) {
+    for probe in existing(in: view) {
+      probe.onRegionChange = nil
+    }
+  }
+
+  @available(iOS 27.1, *)
+  private static func install(in view: UIView, edge: UIRectEdge, guide: UILayoutGuide) -> BarRegionProbeView {
     let probe = BarRegionProbeView(frame: .zero)
+    probe.edge = edge
     probe.isHidden = true
     probe.isUserInteractionEnabled = false
     probe.isAccessibilityElement = false
     probe.accessibilityElementsHidden = true
     probe.translatesAutoresizingMaskIntoConstraints = false
     view.addSubview(probe)
-    // The only layoutGuide(for:) call for this view; repeated calls may add guides.
-    let guide = view.layoutGuide(for: .bar(onEdge: UIRectEdge.top, extent: DuoRailKitPlugin.barExtent))
     NSLayoutConstraint.activate([
       probe.leftAnchor.constraint(equalTo: guide.leftAnchor),
       probe.rightAnchor.constraint(equalTo: guide.rightAnchor),
