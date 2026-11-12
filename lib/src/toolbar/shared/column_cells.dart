@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 
 import '../../core/horizontal_edge.dart';
 import '../vertical_bar_action.dart';

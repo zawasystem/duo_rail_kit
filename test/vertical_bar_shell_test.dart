@@ -3,8 +3,8 @@ import 'dart:math' as math;
 
 import 'package:duo_rail_kit/duo_rail_kit.dart';
 import 'package:duo_rail_kit/src/toolbar/vertical_bar_toolbar.dart' show VerticalBarShellDebugStats;
-import 'package:flutter/cupertino.dart' show CupertinoSheetRoute;
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart' show CupertinoSheetRoute; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/actions.dart';

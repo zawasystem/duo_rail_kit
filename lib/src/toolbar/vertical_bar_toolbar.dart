@@ -10,9 +10,9 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoSheetRoute;
+import 'package:flutter/cupertino.dart' show CupertinoSheetRoute; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
 

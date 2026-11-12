@@ -54,7 +54,7 @@ jobs:
         with:
           # The development SDK (.fvmrc). The publish job installs the same
           # version; update them together.
-          flutter-version: 3.47.9
+          flutter-version: 3.50.0
           channel: stable
           cache: true
       - run: flutter pub get
@@ -111,8 +111,8 @@ jobs:
         # tag's commit. Update them together. The SDK's first run and the
         # package's dependencies are set up here, before the token exists.
         env:
-          FLUTTER_TAG: 3.47.9
-          FLUTTER_COMMIT: c197ca5199e9ee5661e865596c9c07294dfab51c
+          FLUTTER_TAG: 3.50.0
+          FLUTTER_COMMIT: ab2912035e160d9cad6306df307576da6128ebdb
         run: |
           git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$FLUTTER_TAG" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
           if [ "$(git -C "$RUNNER_TEMP/flutter" rev-parse HEAD)" != "$FLUTTER_COMMIT" ]; then
@@ -126,6 +126,6 @@ jobs:
       # GitHub OIDC, so only the publish step follows it.
       - uses: dart-lang/setup-dart@6afc89df92d6eb3834022f73cd65adc8cdfcb92d # v1.8.1
         with:
-          sdk: '3.13.7'
+          sdk: '3.14.0'
       - name: Publish
         run: flutter pub publish --force

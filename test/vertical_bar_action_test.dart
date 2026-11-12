@@ -1,6 +1,6 @@
 import 'package:duo_rail_kit/duo_rail_kit.dart';
 import 'package:duo_rail_kit/src/toolbar/vertical_bar_action.dart' show uniqueVerticalBarActions;
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
 
 /// Returns [value] unchanged; keeps a constructor call out of constant evaluation so its asserts run.

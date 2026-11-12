@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 
 /// Shares FAB placement with content beside a bottom-aligned rail that follows the system bar.
 ///

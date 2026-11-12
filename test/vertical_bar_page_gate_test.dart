@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
 
 import 'support/actions.dart';

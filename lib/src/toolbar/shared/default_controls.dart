@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 
 import '../vertical_bar_action.dart';
 import '../vertical_bar_column.dart';
