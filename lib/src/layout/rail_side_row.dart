@@ -11,18 +11,18 @@ import '../core/horizontal_edge.dart';
 ///
 /// Edges are physical, even with right-to-left text: only the row order is forced
 /// to left-to-right, and the content keeps its inherited text direction.
-class RailSideRow extends StatelessWidget {
-  const RailSideRow({super.key, required this.railEdge, required this.rail, required this.content});
+class const RailSideRow({
+  super.key,
 
   /// The physical rail edge, or null to omit the rail and use bottom navigation.
-  final HorizontalEdge? railEdge;
+  required final HorizontalEdge? railEdge,
 
   /// The rail, built in the [railEdge] slot; not built when [railEdge] is null.
-  final Widget rail;
+  required final Widget rail,
 
   /// The content, expanded to fill the remaining width.
-  final Widget content;
-
+  required final Widget content,
+}) extends StatelessWidget {
   /// The stable content-slot key; callers do not need to provide another key.
   static const Key contentKey = ValueKey('duo-rail-kit-content');
 

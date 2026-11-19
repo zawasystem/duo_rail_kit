@@ -4,8 +4,7 @@ A Flutter plugin for iPhone Duo: navigation rails on the physical edge iOS
 chooses, pushed and tab pages' back controls and actions in the system's
 vertical bar where UIKit puts them, the system's bar regions, and safe-area and
 FAB helpers. Navigation, styling, breakpoints, grids, SnackBars, overlays, and
-content/FAB avoidance stay with the application; the only runtime dependency is
-Flutter.
+content/FAB avoidance stay with the application.
 
 The example on the iOS 27.2 Simulator ([details](doc/images/README.md)):
 
@@ -21,7 +20,7 @@ The example on the iOS 27.2 Simulator ([details](doc/images/README.md)):
 
 ## Requirements
 
-- Flutter `>=3.47.8`, Dart `^3.12.0`.
+- Flutter `>=3.50.0`, Dart `^3.14.0`.
 - iOS: Swift Package Manager, deployment target 15.0+, no CocoaPods.
 - Native compilation: Xcode with the iOS 27.1 SDK, which declares
   `UITraitCollection.verticalBarEdge` and
@@ -35,13 +34,47 @@ Flutter iOS host.
 
 ## Installation
 
+For hosted 0.3.x releases, declare the packages used by the quick start in
+your app's `pubspec.yaml`:
+
 ```yaml
 dependencies:
-  duo_rail_kit: ^0.2.1
+  duo_rail_kit: ^0.3.0
+  material_ui: ^1.11.1
 ```
 
-Run `flutter pub get` and commit `pubspec.lock`. API docs are on
-[pub.dev](https://pub.dev/packages/duo_rail_kit).
+Run `flutter pub get` and commit your app's `pubspec.lock`. To try a checkout
+before publication, use a `path` dependency for `duo_rail_kit`, as in the
+[example pubspec](example/pubspec.yaml). Published versions and API docs are
+on [pub.dev](https://pub.dev/packages/duo_rail_kit).
+
+### Migrating from 0.2.x
+
+0.3 uses Flutter's standalone Material and Cupertino packages. The widget
+names are familiar, but Dart gives classes from the SDK and the standalone
+libraries distinct types. Apps that still use the SDK's Material components
+for their FAB or vertical toolbar can stay on `^0.2.1` while migrating.
+
+1. Replace `package:flutter/material.dart` with `package:material_ui/material_ui.dart`
+   in the app, including widget tests. Use its `MaterialApp`, `Scaffold`, and
+   `Tooltip` with `RailSideFab.locationOf` and `VerticalBarCell.tooltipPosition`.
+   `RailSideFabLocation` extends the standalone `FloatingActionButtonLocation`,
+   and `tooltipConstraints` reads the standalone `TooltipTheme`.
+2. Pass the standalone `ThemeData` to `MaterialApp`. For a multilingual app,
+   include `GlobalMaterialLocalizations.delegates` from `material_ui` alongside
+   the app's own delegates. This supplies the Material, Cupertino and Widgets
+   translations used by controls, tooltips and menus.
+3. If the app uses Cupertino sheets, add `cupertino_ui: ^1.1.7` and replace
+   `package:flutter/cupertino.dart` with `package:cupertino_ui/cupertino_ui.dart`
+   where the sheets are created. `VerticalBarPage` detects that package's
+   `CupertinoSheetRoute` and leaves sheet actions in the page's own toolbar.
+
+For a legacy dependency inside a migrated app, Flutter's temporary
+`MaterialUiCompatibilityBridge` and `CupertinoUiCompatibilityBridge` supply
+legacy descendants with theme values and localisations. For typed FAB locations
+and Cupertino sheet detection, migrate the consuming `Scaffold` and sheet
+route as well. See the [Material migration guide](https://pub.dev/packages/material_ui#migrating-existing-code-to-this-package)
+and [Cupertino migration guide](https://pub.dev/packages/cupertino_ui#migrating-existing-code-to-this-package).
 
 ## Quick start
 
@@ -49,7 +82,7 @@ Wrap the application once:
 
 ```dart
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 
 MaterialApp(
   builder: (context, child) => VerticalBarEdge(

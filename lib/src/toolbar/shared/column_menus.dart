@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:material_ui/material_ui.dart';
 
 import '../../core/horizontal_edge.dart';
 import '../vertical_bar_action.dart';
@@ -128,25 +128,16 @@ PopupMenuEntry<int> _actionRow(int index, VerticalBarAction action, {required bo
 }
 
 /// A menu row: the icon, then the label.
-class _MenuRow extends StatelessWidget {
-  const _MenuRow({
-    required this.icon,
-    required this.reserveIcon,
-    required this.label,
-    required this.enabled,
-    this.destructive = false,
-  });
-
-  final Widget? icon;
+class const _MenuRow({
+  required final Widget? icon,
 
   /// Whether a row without [icon] keeps a blank one, so that its label lines up with the labels of the
   /// menu's rows with an icon or a check mark. In a menu without either, labels start where icons would.
-  final bool reserveIcon;
-
-  final String label;
-  final bool enabled;
-  final bool destructive;
-
+  required final bool reserveIcon,
+  required final String label,
+  required final bool enabled,
+  final bool destructive = false,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = destructive ? Theme.of(context).colorScheme.error : null;

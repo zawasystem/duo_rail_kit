@@ -1,6 +1,6 @@
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// Geometry measured with a real Scaffold.
 /// Keep these expectations independent of the implementation's calculations.
@@ -39,9 +39,7 @@ Widget _scaffold(
 );
 
 /// Reads the FAB location/enabled state and counts rebuilds.
-class _Reader extends StatelessWidget {
-  const _Reader();
-
+class const _Reader() extends StatelessWidget {
   static int builds = 0;
   static FloatingActionButtonLocation? location;
   static bool? enabled;

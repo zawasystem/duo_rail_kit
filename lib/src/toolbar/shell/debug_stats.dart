@@ -3,7 +3,7 @@ part of '../vertical_bar_toolbar.dart';
 /// Counters that the package's tests read, changed only in debug builds.
 @visibleForTesting
 // ignore: avoid_classes_with_only_static_members, one name for tests to import.
-abstract final class VerticalBarShellDebugStats {
+abstract final class VerticalBarShellDebugStats() {
   /// Notifications that reached a shell from another build scope while it was not laying out its row,
   /// so that it laid out again after the frame.
   static int deferredNotifications = 0;

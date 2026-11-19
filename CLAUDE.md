@@ -7,9 +7,11 @@ the release steps.
 
 - Use FVM; `.fvmrc` pins the development SDK. Run the package and example
   checks in CONTRIBUTING.md.
-- Keep runtime dependencies limited to Flutter. Keep the application's code,
-  navigation, styling, assets, localisation, analytics and account
-  integrations, and any credentials or customer data, out of the package.
+- Keep direct runtime dependencies limited to the Flutter SDK and its official
+  `material_ui` and `cupertino_ui` packages. Import Material and Cupertino APIs
+  from those packages. Keep the application's code, navigation, styling,
+  assets, localisation, analytics and account integrations, and any
+  credentials or customer data, out of the package.
 - Write comments, test names, fixture labels, diagnostics, and documentation in
   concise English. Keep API constraints and non-obvious implementation reasons;
   omit duplicate explanations and application history.

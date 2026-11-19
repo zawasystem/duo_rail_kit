@@ -16,9 +16,20 @@ import '../layout/side_status_bar_insets.dart';
 /// metrics match UIKit on iPhone Duo. Values are logical pixels in window coordinates with physical
 /// left/right.
 @immutable
-class VerticalBarColumn {
-  const VerticalBarColumn({required this.edge, required this.viewSize, required this.column, required this.items});
+class const VerticalBarColumn({
+  /// The physical edge of the column.
+  required final HorizontalEdge edge,
 
+  /// The window size of the sample.
+  required final Size viewSize,
+
+  /// The whole column at full window height: from the window edge to the item region's inner side
+  /// plus [innerMargin], or to the edge's OS safe-area inset when that is wider.
+  required final Rect column,
+
+  /// Where cells go: the region's horizontal range, from the first cell's top to the region's bottom.
+  required final Rect items,
+}) {
   /// Side of one square cell: the tap target of one item and the width of the item region.
   static const double cellExtent = 48;
 
@@ -33,19 +44,6 @@ class VerticalBarColumn {
 
   /// Gap between the item region and the column's inner edge.
   static const double innerMargin = 12;
-
-  /// The physical edge of the column.
-  final HorizontalEdge edge;
-
-  /// The window size of the sample.
-  final Size viewSize;
-
-  /// The whole column at full window height: from the window edge to the item region's inner side
-  /// plus [innerMargin], or to the edge's OS safe-area inset when that is wider.
-  final Rect column;
-
-  /// Where cells go: the region's horizontal range, from the first cell's top to the region's bottom.
-  final Rect items;
 
   /// The width of [column].
   double get width => column.width;
@@ -244,19 +242,18 @@ extension VerticalBarColumnArrangement on VerticalBarColumn {
 }
 
 /// Where [VerticalBarColumnArrangement.arrange] placed each group, and which items moved to the overflow menu.
+/// Both lists are unmodifiable copies.
 @immutable
-class VerticalBarArrangement {
-  /// Wraps both lists in [List.unmodifiable].
-  VerticalBarArrangement({required List<VerticalBarGroupSlot?> groups, required List<int> overflow})
-    : groups = List.unmodifiable(groups),
-      overflow = List.unmodifiable(overflow);
-
+class const VerticalBarArrangement._(
   /// One entry per input group, top to bottom; null when all of its items are in the overflow and
   /// it does not hold the overflow cell.
-  final List<VerticalBarGroupSlot?> groups;
+  final List<VerticalBarGroupSlot?> groups,
 
   /// Flattened indices of the items in the overflow menu, in input order; empty when all are shown.
-  final List<int> overflow;
+  final List<int> overflow,
+) {
+  new({required List<VerticalBarGroupSlot?> groups, required List<int> overflow})
+    : this._(List.unmodifiable(groups), List.unmodifiable(overflow));
 
   /// The overflow cell in window coordinates, or null when [overflow] is empty.
   Rect? get overflowCell {
@@ -282,21 +279,20 @@ class VerticalBarArrangement {
   String toString() => 'VerticalBarArrangement(groups: $groups, overflow: $overflow)';
 }
 
-/// One group of cells in a [VerticalBarArrangement].
+/// One group of cells in a [VerticalBarArrangement], with an unmodifiable copy of [shown].
 @immutable
-class VerticalBarGroupSlot {
-  /// Wraps [shown] in [List.unmodifiable].
-  VerticalBarGroupSlot({required this.rect, required List<int> shown, required this.endsWithOverflow})
-    : shown = List.unmodifiable(shown);
-
+class const VerticalBarGroupSlot._(
   /// The group's capsule in window coordinates, [VerticalBarColumn.cellExtent] wide.
-  final Rect rect;
+  final Rect rect,
 
   /// Flattened indices of the items shown in this group's cells, top to bottom.
-  final List<int> shown;
+  final List<int> shown,
 
   /// Whether this group's last cell is the overflow cell.
-  final bool endsWithOverflow;
+  final bool endsWithOverflow,
+) {
+  new({required Rect rect, required List<int> shown, required bool endsWithOverflow})
+    : this._(rect, List.unmodifiable(shown), endsWithOverflow);
 
   /// Cell rectangles, top to bottom: one per [shown] item, then the overflow cell when [endsWithOverflow].
   List<Rect> get cells => List.unmodifiable([

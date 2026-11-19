@@ -40,14 +40,12 @@ VerticalBarGroupSlot _inner(double top, double bottom, List<int> shown, {bool ov
     _slot(879, top, bottom, shown, overflow: overflow);
 
 /// Reads [VerticalBarColumn.of] and counts builds.
-class _ColumnProbe extends StatefulWidget {
-  const _ColumnProbe();
-
+class const _ColumnProbe() extends StatefulWidget {
   @override
   State<_ColumnProbe> createState() => _ColumnProbeState();
 }
 
-class _ColumnProbeState extends State<_ColumnProbe> {
+class _ColumnProbeState() extends State<_ColumnProbe> {
   static int builds = 0;
   static VerticalBarColumn? column;
 

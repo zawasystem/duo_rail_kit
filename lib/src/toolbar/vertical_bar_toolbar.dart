@@ -10,11 +10,11 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/cupertino.dart' show CupertinoSheetRoute; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoSheetRoute;
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter/rendering.dart';
 import 'package:flutter/scheduler.dart';
+import 'package:material_ui/material_ui.dart';
 
 import '../core/geometry.dart';
 import '../core/horizontal_edge.dart';

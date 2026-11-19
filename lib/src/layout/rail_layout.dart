@@ -16,16 +16,24 @@ import 'rail_placement.dart';
 /// Call it in the context that sizes the rail, before the body's occupied horizontal inset is removed (the context in
 /// which [RailPlacement.railSafeAreaOf] would be read). [RailPlacement] stays the lower-level API.
 @immutable
-class RailLayout {
-  const RailLayout._({required this.placement, required this.width, required this.safeArea});
+class const RailLayout._({
+  /// The rail's placement, or null for bottom navigation.
+  required final RailPlacement? placement,
 
+  /// The rail's own width: `systemRailWidth` while the rail follows the system bar, else `railWidth`, also without a
+  /// rail. Greater than 0 when the widths passed to [RailLayout.of] are, so it can be a `NavigationRail.minWidth`.
+  required final double width,
+
+  /// The safe area from [RailPlacement.railSafeAreaOf], used to size and position the rail.
+  required final EdgeInsets safeArea,
+}) {
   /// Reads the rail layout for [context].
   ///
   /// Reads [RailPlacement.of] with [showsRailByWidth], then [RailPlacement.railSafeAreaOf] with [receivesAddedTop].
   /// [railWidth] is the width of a width-based rail; a rail that follows the system bar uses [systemRailWidth]
   /// instead, which defaults to [RailPlacement.systemRailWidth]. Both must be greater than 0. Pass
   /// [RailPlacement.statusColumnWidth] as [systemRailWidth] to keep a system rail at the status column's width.
-  factory RailLayout.of(
+  factory of(
     BuildContext context, {
     required bool Function(double windowWidth) showsRailByWidth,
     required double railWidth,
@@ -40,16 +48,6 @@ class RailLayout {
       safeArea: safeArea,
     );
   }
-
-  /// The rail's placement, or null for bottom navigation.
-  final RailPlacement? placement;
-
-  /// The rail's own width: `systemRailWidth` while the rail follows the system bar, else `railWidth`, also without a
-  /// rail. Greater than 0 when the widths passed to [RailLayout.of] are, so it can be a `NavigationRail.minWidth`.
-  final double width;
-
-  /// The safe area from [RailPlacement.railSafeAreaOf], used to size and position the rail.
-  final EdgeInsets safeArea;
 
   /// The physical edge containing the rail, or null without a rail.
   HorizontalEdge? get edge => placement?.edge;

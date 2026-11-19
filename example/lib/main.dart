@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:material_ui/material_ui.dart';
 
 import 'app.dart';
 

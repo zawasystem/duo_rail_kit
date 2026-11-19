@@ -1,5 +1,5 @@
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:material_ui/material_ui.dart';
 
 void _noop(VerticalBarInvocation invocation) {}
 
@@ -20,22 +20,18 @@ List<VerticalBarAction> numberedActions(
 ];
 
 /// A first page with the text 'Home'.
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
+class const HomePage({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Home')));
 }
 
 /// A custom cell control that counts its taps in its own State.
-class CounterCell extends StatefulWidget {
-  const CounterCell({super.key});
-
+class const CounterCell({super.key}) extends StatefulWidget {
   @override
   State<CounterCell> createState() => CounterCellState();
 }
 
-class CounterCellState extends State<CounterCell> {
+class CounterCellState() extends State<CounterCell> {
   int taps = 0;
 
   @override

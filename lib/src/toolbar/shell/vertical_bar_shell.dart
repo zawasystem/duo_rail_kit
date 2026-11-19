@@ -24,33 +24,26 @@ part of '../vertical_bar_toolbar.dart';
 ///   widgets of the page are not visible to them. Menus open on the root Navigator.
 /// * Screen readers and Tab visit the cells first, then the rail and the content. The shell is always
 ///   one focus traversal group, so a sibling such as a floating action button comes before or after it.
-class VerticalBarShell extends StatefulWidget {
-  const VerticalBarShell({
-    super.key,
-    required this.railEdge,
-    required this.rail,
-    required this.content,
-    this.enabled = true,
-    this.reservesBack = false,
-  });
+class const VerticalBarShell({
+  super.key,
 
   /// As in [RailSideRow].
-  final HorizontalEdge? railEdge;
+  required final HorizontalEdge? railEdge,
 
   /// As in [RailSideRow].
-  final Widget rail;
+  required final Widget rail,
 
   /// As in [RailSideRow], in its keyed slot.
-  final Widget content;
+  required final Widget content,
 
   /// False never uses the column, for example while the pages are two-pane.
-  final bool enabled;
+  final bool enabled = true,
 
   /// Whether pages with a back control, such as pages pushed inside a branch, may use the column.
   /// True reserves a back control and one cell, so the rail's top padding is one group lower on every
   /// tab; false keeps the app bar of a page with a back control.
-  final bool reservesBack;
-
+  final bool reservesBack = false,
+}) extends StatefulWidget {
   /// [padding] with its top raised to [VerticalBarColumn.groupGap] below the reserved cells while the
   /// nearest [VerticalBarShell] uses the column, or unchanged. Pass it as the rail's MediaQuery
   /// padding, after [RailLayout.centredSafeArea] or [RailPlacement.centredRailSafeArea] if used. Call it
@@ -67,7 +60,7 @@ class VerticalBarShell extends StatefulWidget {
   State<VerticalBarShell> createState() => _VerticalBarShellState();
 }
 
-class _VerticalBarShellState extends State<VerticalBarShell> {
+class _VerticalBarShellState() extends State<VerticalBarShell> {
   final _ShellRegistry _registry = _ShellRegistry();
 
   late final TraversalPolicies _policies = TraversalPolicies(isColumn: _isColumnGroup);
@@ -260,21 +253,14 @@ Widget _inertCells({required bool inert, required Widget child}) => ExcludeSeman
 );
 
 /// The values the shell decided in its build, for the pages and the rail below it.
-class _ShellScope extends InheritedWidget {
-  const _ShellScope({
-    required this.registry,
-    required this.used,
-    required this.reservesBack,
-    required super.child,
-  });
-
-  final _ShellRegistry registry;
+class const _ShellScope({
+  required final _ShellRegistry registry,
 
   /// The [_UsedColumn], or null where the shell lays out as a [RailSideRow].
-  final _UsedColumn? used;
-
-  final bool reservesBack;
-
+  required final _UsedColumn? used,
+  required final bool reservesBack,
+  required super.child,
+}) extends InheritedWidget {
   @override
   bool updateShouldNotify(_ShellScope oldWidget) =>
       registry != oldWidget.registry || used != oldWidget.used || reservesBack != oldWidget.reservesBack;

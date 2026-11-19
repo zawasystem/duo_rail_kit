@@ -18,11 +18,7 @@ import '../edge/vertical_bar_edge.dart';
 /// Wrap the application once, inside [VerticalBarEdge]: `VerticalBarEdge(child: SideStatusBarInsets(child: ...))`.
 /// The native edge is null until the first native reply, so the column-free left Split View window gets its spacing
 /// only then; a window with one status column gets it from its geometry at once.
-class SideStatusBarInsets extends StatelessWidget {
-  const SideStatusBarInsets({super.key, required this.child});
-
-  final Widget child;
-
+class const SideStatusBarInsets({super.key, required final Widget child}) extends StatelessWidget {
   /// Minimum top spacing, in logical pixels, to keep controls off the screen edge.
   static const double minTop = 16;
 
@@ -90,11 +86,7 @@ class SideStatusBarInsets extends StatelessWidget {
 }
 
 /// Exposes the inset added by [SideStatusBarInsets] to descendants.
-class _SideStatusBarScope extends InheritedWidget {
-  const _SideStatusBarScope({required this.added, required super.child});
-
-  final EdgeInsets added;
-
+class const _SideStatusBarScope({required final EdgeInsets added, required super.child}) extends InheritedWidget {
   @override
   bool updateShouldNotify(_SideStatusBarScope oldWidget) => oldWidget.added != added;
 }

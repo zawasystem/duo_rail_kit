@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 ///
 /// Each file under `lib/src` belongs to a layer, ranked from its path: `core/` 0, `edge/` 1, `layout/` 2, `toolbar/` 3,
 /// `toolbar/shared/` 4, and the page and shell library (`toolbar/vertical_bar_toolbar.dart` with its parts in
-/// `toolbar/page/` and `toolbar/shell/`) 5. A file imports only Dart, Flutter, and files of its own or a lower rank, a
-/// part keeps the rank of its library, and the imports form no cycle. Conditional imports and exports are rejected.
+/// `toolbar/page/` and `toolbar/shell/`) 5. Imports may use Dart, Flutter, the public Material and Cupertino libraries,
+/// and files of the same or a lower rank. Parts retain their library's rank. Cycles and conditional directives fail.
 /// `/// @docImport` lines are comments and may point upwards.
 void main() {
   // Run `fvm flutter test` from the package root.
@@ -69,7 +69,7 @@ void main() {
     return segments.join('/');
   }
 
-  test('lib/src imports only Dart, Flutter, and its own or a lower layer, without cycles', () {
+  test('lib/src uses only approved libraries and imports its own or a lower layer, without cycles', () {
     final files = [
       for (final entity in Directory(sourceRoot).listSync(recursive: true))
         if (entity is File && entity.path.endsWith('.dart')) entity.path.replaceAll(r'\', '/').substring('lib/'.length),
@@ -96,8 +96,14 @@ void main() {
         }
         final target = resolve(file, directive.uri);
         if (target == null) {
-          if (!directive.uri.startsWith('dart:') && !directive.uri.startsWith('package:flutter/')) {
-            violations.add('$file ${directive.keyword}s ${directive.uri}, which is neither Dart nor Flutter');
+          final uri = directive.uri;
+          if (uri == 'package:flutter/material.dart' || uri == 'package:flutter/cupertino.dart') {
+            violations.add('$file uses the deprecated UI library $uri');
+          } else if (!uri.startsWith('dart:') &&
+              !uri.startsWith('package:flutter/') &&
+              uri != 'package:material_ui/material_ui.dart' &&
+              uri != 'package:cupertino_ui/cupertino_ui.dart') {
+            violations.add('$file ${directive.keyword}s an unapproved library: $uri');
           }
           continue;
         }

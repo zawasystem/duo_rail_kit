@@ -1,11 +1,9 @@
-import 'dart:async';
-
+import 'package:cupertino_ui/cupertino_ui.dart';
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/cupertino.dart'; // ignore: deprecated_member_use, unnecessary_ignore
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter/rendering.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'support/actions.dart';
 import 'support/cells.dart';
@@ -85,13 +83,11 @@ Widget _scaffold(VerticalBarSlots slots, List<VerticalBarAction> actions, {Widge
   body: body ?? const _Body(),
 );
 
-class _Body extends StatelessWidget {
-  const _Body({this.buttonOrder});
-
+class const _Body({
   /// When non-null, the body is an [OrderedTraversalPolicy] group in which only the button has this order,
   /// so that it comes before the field, which has none.
-  final FocusOrder? buttonOrder;
-
+  final FocusOrder? buttonOrder,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final order = buttonOrder;
@@ -123,7 +119,7 @@ const List<(String, FocusOrder?)> _bodyOrders = [
 ];
 
 /// Records what the page builder received.
-class _Record {
+class _Record() {
   int builds = 0;
   VerticalBarSlots? slots;
 
@@ -304,29 +300,23 @@ Future<Rect> _showTooltip(WidgetTester tester, String tooltip) async {
 }
 
 /// Keeps a State to prove that a cell or page part was not recreated.
-class _Probe extends StatefulWidget {
-  const _Probe();
-
+class const _Probe() extends StatefulWidget {
   @override
   State<_Probe> createState() => _ProbeState();
 }
 
-class _ProbeState extends State<_Probe> {
+class _ProbeState() extends State<_Probe> {
   @override
   Widget build(BuildContext context) => const SizedBox.square(dimension: 40);
 }
 
 /// Rebuilds its child builder on request, as an application parent would.
-class _Rebuilder extends StatefulWidget {
-  const _Rebuilder({super.key, required this.builder});
-
-  final WidgetBuilder builder;
-
+class const _Rebuilder({super.key, required final WidgetBuilder builder}) extends StatefulWidget {
   @override
   State<_Rebuilder> createState() => _RebuilderState();
 }
 
-class _RebuilderState extends State<_Rebuilder> {
+class _RebuilderState() extends State<_Rebuilder> {
   void rebuild() => setState(() {});
 
   @override
@@ -334,25 +324,18 @@ class _RebuilderState extends State<_Rebuilder> {
 }
 
 /// Hosts a nested Navigator with a page of [height] at the window's top-left corner.
-class _ShortHost extends StatefulWidget {
-  const _ShortHost({
-    super.key,
-    required this.height,
-    required this.page,
-    this.bottomViewPadding,
-    this.navigatorKey,
-  });
-
-  final double height;
-  final double? bottomViewPadding;
-  final Widget page;
-  final GlobalKey<NavigatorState>? navigatorKey;
-
+class const _ShortHost({
+  super.key,
+  required final double height,
+  required final Widget page,
+  final double? bottomViewPadding,
+  final GlobalKey<NavigatorState>? navigatorKey,
+}) extends StatefulWidget {
   @override
   State<_ShortHost> createState() => _ShortHostState();
 }
 
-class _ShortHostState extends State<_ShortHost> {
+class _ShortHostState() extends State<_ShortHost> {
   late double height = widget.height;
 
   void resize(double value) => setState(() => height = value);
@@ -382,11 +365,7 @@ class _ShortHostState extends State<_ShortHost> {
 }
 
 /// Reads the slots from deep inside a page.
-class _SlotsReader extends StatelessWidget {
-  const _SlotsReader(this.record);
-
-  final _Record record;
-
+class const _SlotsReader(final _Record record) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     record.slots = VerticalBarSlots.maybeOf(context);
@@ -1200,17 +1179,15 @@ void main() {
 
     testWidgets('in a nested Navigator inside a window-wide bottom sheet', (tester) async {
       final record = await pushed(tester, (navigator, record) async {
-        unawaited(
-          showModalBottomSheet<void>(
-            context: navigator.currentContext!,
-            constraints: const BoxConstraints(),
-            isScrollControlled: true,
-            builder: (_) => SizedBox(
-              height: 400,
-              child: Navigator(
-                key: const ValueKey('sheet'),
-                onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => _recordingPage(record)),
-              ),
+        showModalBottomSheet<void>(
+          context: navigator.currentContext!,
+          constraints: const BoxConstraints(),
+          isScrollControlled: true,
+          builder: (_) => SizedBox(
+            height: 400,
+            child: Navigator(
+              key: const ValueKey('sheet'),
+              onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => _recordingPage(record)),
             ),
           ),
         );
@@ -1466,11 +1443,9 @@ void main() {
       await tester.pumpWidget(_app(innerLandscape, navigatorKey: navigator));
       await _push(tester, navigator, (_) => _page(actions: [_share(onPressed: (_) => taps++)]));
 
-      unawaited(
-        showDialog<void>(
-          context: navigator.currentContext!,
-          builder: (_) => const AlertDialog(content: Text('Dialog')),
-        ),
+      showDialog<void>(
+        context: navigator.currentContext!,
+        builder: (_) => const AlertDialog(content: Text('Dialog')),
       );
       await tester.pumpAndSettle();
       expect(ignoresPointersAbove(tester, find.byTooltip('Share')), isTrue);
@@ -1478,11 +1453,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Dialog'), findsNothing, reason: 'the tap reached the scrim');
 
-      unawaited(
-        showModalBottomSheet<void>(
-          context: tester.element(find.byKey(_bodyKey)),
-          builder: (_) => const SizedBox(height: 120, child: Text('Sheet')),
-        ),
+      showModalBottomSheet<void>(
+        context: tester.element(find.byKey(_bodyKey)),
+        builder: (_) => const SizedBox(height: 120, child: Text('Sheet')),
       );
       await tester.pumpAndSettle();
       await tester.tapAt(_firstCell.center);
@@ -1507,11 +1480,9 @@ void main() {
       await _push(tester, inner, (_) => _page(actions: [_share(onPressed: (_) => taps++)]));
       expect(tester.getRect(find.byTooltip('Share')), _firstCell);
 
-      unawaited(
-        showModalBottomSheet<void>(
-          context: tester.element(find.byKey(_bodyKey)),
-          builder: (_) => const SizedBox(height: 120, child: Text('Sheet')),
-        ),
+      showModalBottomSheet<void>(
+        context: tester.element(find.byKey(_bodyKey)),
+        builder: (_) => const SizedBox(height: 120, child: Text('Sheet')),
       );
       await tester.pumpAndSettle();
       expect(find.descendant(of: find.byKey(inner), matching: find.text('Sheet')), findsOneWidget);
@@ -1878,11 +1849,9 @@ void main() {
         expect(record.slots?.active, width == 951, reason: 'a branch page does not use the column');
         final builds = (home: homeBuilds, page: pageBuilds);
 
-        unawaited(
-          showDialog<void>(
-            context: navigator.currentContext!,
-            builder: (_) => const AlertDialog(content: Text('Dialog')),
-          ),
+        showDialog<void>(
+          context: navigator.currentContext!,
+          builder: (_) => const AlertDialog(content: Text('Dialog')),
         );
         await tester.pumpAndSettle();
         navigator.currentState!.pop();

@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.3.0
+
+- Require Flutter 3.50.0 and Dart 3.14.0 or later within Dart 3.x.
+- Move the FAB and vertical toolbar to Flutter's official `material_ui` and
+  `cupertino_ui` packages. Apps integrating these features need the matching
+  Material types, localisation delegates and Cupertino sheet routes. See
+  [Migrating from 0.2.x](README.md#migrating-from-02x).
+
 ## 0.2.1
 
 - Update vertical toolbar positions when UIKit moves a side bar layout guide,

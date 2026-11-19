@@ -21,64 +21,54 @@ part of '../vertical_bar_toolbar.dart';
 ///
 /// Menus open 8 logical pixels beside the column's inner edge, on the page's Navigator (the root
 /// Navigator below a shell). A choice made after the page is gone is dropped.
-class VerticalBarPage extends StatefulWidget {
-  const VerticalBarPage({
-    super.key,
-    this.enabled = true,
-    this.back = VerticalBarBack.automatic,
-    this.actions = const <VerticalBarAction>[],
-    this.itemBuilder,
-    this.backBuilder,
-    this.overflowBuilder,
-    this.groupDecoration,
-    required this.builder,
-  });
+class const VerticalBarPage({
+  super.key,
 
   /// False keeps everything in the app bar, for example in two-pane layouts or on pages with a Drawer.
-  final bool enabled;
+  final bool enabled = true,
 
   /// The back control placed first in the column.
-  final VerticalBarBack back;
+  final VerticalBarBack back = VerticalBarBack.automatic,
 
   /// In app-bar order: left to right becomes top to bottom.
-  final List<VerticalBarAction> actions;
+  final List<VerticalBarAction> actions = const <VerticalBarAction>[],
 
   /// Draws standard actions; the package's default control is used when null or when it returns null.
-  final VerticalBarItemBuilder? itemBuilder;
+  final VerticalBarItemBuilder? itemBuilder,
 
   /// Draws the back control; the package's default is used when null. Its cell's `invoke` pops.
-  final VerticalBarCellBuilder? backBuilder;
+  final VerticalBarCellBuilder? backBuilder,
 
   /// Draws the overflow cell; the package's default is used when null. Its cell's `invoke` opens the menu.
-  final VerticalBarCellBuilder? overflowBuilder;
+  final VerticalBarCellBuilder? overflowBuilder,
 
   /// Painted behind each group, never hit-tested; none by default.
-  final Decoration? groupDecoration;
+  final Decoration? groupDecoration,
 
   /// Builds the page, usually its Scaffold, with this frame's slots. The context is below this
   /// widget, so [VerticalBarSlots.maybeOf] returns `slots` there.
-  final Widget Function(BuildContext context, VerticalBarSlots slots) builder;
-
+  required final Widget Function(BuildContext context, VerticalBarSlots slots) builder,
+}) extends StatefulWidget {
   @override
   State<VerticalBarPage> createState() => _VerticalBarPageState();
 }
 
 /// What the page's app bar should leave out in this frame.
 @immutable
-class VerticalBarSlots {
-  const VerticalBarSlots({this.column, this.backInColumn = false}) : assert(!backInColumn || column != null);
-
+class const VerticalBarSlots({
   /// The window's column while the page's controls are in it, or null when the app bar is used as usual.
   /// A [VerticalBarShell] draws a tab page's cells, centred on the rail; [VerticalBarCell.rect] gives
   /// their positions.
-  final VerticalBarColumn? column;
+  final VerticalBarColumn? column,
+
+  /// Whether the column shows the back control; pass `automaticallyImplyLeading: !backInColumn`.
+  final bool backInColumn = false,
+}) {
+  this : assert(!backInColumn || column != null);
 
   /// Whether the page's actions are in the column; the app bar should then omit them. Below a
   /// [VerticalBarShell] they are drawn while the page is the shell's current page.
   bool get active => column != null;
-
-  /// Whether the column shows the back control; pass `automaticallyImplyLeading: !backInColumn`.
-  final bool backInColumn;
 
   /// The slots of the nearest [VerticalBarPage], for widgets deep in the page such as a sliver app bar.
   ///
@@ -102,9 +92,7 @@ class VerticalBarSlots {
 /// Not an enum, so that other kinds, such as a custom action, can be added without a breaking change.
 @immutable
 // ignore: use_enums, see the class doc.
-final class VerticalBarBack {
-  const VerticalBarBack._(this._kind);
-
+final class const VerticalBarBack._(final _BackKind _kind) {
   /// Same rule as AppBar's implied leading: a back button when the route implies dismissal
   /// (`ModalRoute.impliesAppBarDismissal`), a close button for a fullscreen dialog. Pressing calls
   /// `Navigator.maybePop` with the page's context, so `PopScope` applies.
@@ -113,15 +101,16 @@ final class VerticalBarBack {
   /// No back control in the column; the app bar keeps its own leading.
   static const VerticalBarBack none = VerticalBarBack._(_BackKind.none);
 
-  final _BackKind _kind;
-
   @override
   String toString() => 'VerticalBarBack.${_kind.name}';
 }
 
-enum _BackKind { automatic, none }
+enum _BackKind() {
+  automatic,
+  none,
+}
 
-class _VerticalBarPageState extends State<VerticalBarPage> {
+class _VerticalBarPageState() extends State<VerticalBarPage> {
   static int _nextMountSerial = 0;
 
   /// Orders the pages by when their States were created: of two current pages below a shell, the
@@ -470,13 +459,11 @@ bool _debugCheckActions(List<VerticalBarAction> actions) {
 }
 
 /// Shares the page's slots, and whether it or an ancestor page uses the column, with descendants.
-class _VerticalBarPageScope extends InheritedWidget {
-  const _VerticalBarPageScope({required this.slots, required this.columnInUse, required super.child});
-
-  final VerticalBarSlots slots;
-
-  final bool columnInUse;
-
+class const _VerticalBarPageScope({
+  required final VerticalBarSlots slots,
+  required final bool columnInUse,
+  required super.child,
+}) extends InheritedWidget {
   @override
   bool updateShouldNotify(_VerticalBarPageScope oldWidget) =>
       oldWidget.slots != slots || oldWidget.columnInUse != columnInUse;

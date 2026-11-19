@@ -1,5 +1,5 @@
 /// A physical screen edge, independent of text direction.
-enum HorizontalEdge {
+enum HorizontalEdge() {
   /// The screen's left edge.
   left,
 

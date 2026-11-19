@@ -19,18 +19,16 @@ import '../core/horizontal_edge.dart';
 /// Values are logical pixels in window coordinates with physical left/right. Read it with [of], which rejects samples
 /// that no longer match the current window.
 @immutable
-class TopBarRegion {
-  const TopBarRegion({required this.rect, required this.safeTop, required this.viewSize});
-
+class const TopBarRegion({
   /// The window-space rectangle the system reserves for a top bar beside the status display.
-  final Rect rect;
+  required final Rect rect,
 
   /// The top safe-area inset when the region was sampled.
-  final double safeTop;
+  required final double safeTop,
 
   /// The window size when the region was sampled.
-  final Size viewSize;
-
+  required final Size viewSize,
+}) {
   /// Insets that place a bar row of [pane] inside [rect]: left, top, and right; bottom is 0.
   ///
   /// [pane] uses the same window coordinates, for example the global rectangle of a header that
@@ -82,24 +80,22 @@ class TopBarRegion {
 /// Values are logical pixels in window coordinates. Read it with [of], which rejects samples that no longer match the
 /// current window size.
 @immutable
-class VerticalBarRegion {
-  const VerticalBarRegion({required this.rect, required this.edge, required this.viewSize, this.topBarTop});
-
+class const VerticalBarRegion({
   /// The window-space rectangle the system reserves for vertical bar items.
-  final Rect rect;
+  required final Rect rect,
 
   /// The physical edge of the vertical bar, matching [VerticalBarEdge.of] for the same sample.
-  final HorizontalEdge edge;
+  required final HorizontalEdge edge,
 
   /// The window size when the region was sampled.
-  final Size viewSize;
+  required final Size viewSize,
 
   /// The top of the system's top bar region (`bar(onEdge: .top, extent: 48)`) in the same sample, or null when the
   /// payload has no usable value.
   ///
   /// Unlike [TopBarRegion], it carries no safe-area condition. When present it is at least 0 and above [rect]'s bottom.
-  final double? topBarTop;
-
+  final double? topBarTop,
+}) {
   /// The region for [context], or null when there is none or the sample does not match the
   /// current [MediaQuery] size within 0.5.
   ///
@@ -133,15 +129,16 @@ class VerticalBarRegion {
 /// [VerticalBarEdge] always builds one below its [VerticalBarEdgeScope], whether or not a region
 /// exists. Read the values through [TopBarRegion.of] and [VerticalBarRegion.of], which also check
 /// them against the current [MediaQuery].
-class BarRegionScope extends InheritedWidget {
-  const BarRegionScope({super.key, this.topBar, this.verticalBar, required super.child});
+class const BarRegionScope({
+  super.key,
 
   /// The sampled top bar region, or null when there is none.
-  final TopBarRegion? topBar;
+  final TopBarRegion? topBar,
 
   /// The sampled vertical bar region, or null when there is none.
-  final VerticalBarRegion? verticalBar;
-
+  final VerticalBarRegion? verticalBar,
+  required super.child,
+}) extends InheritedWidget {
   @override
   bool updateShouldNotify(BarRegionScope oldWidget) =>
       oldWidget.topBar != topBar || oldWidget.verticalBar != verticalBar;

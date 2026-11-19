@@ -59,12 +59,14 @@ dependency_path = json.dumps(str(package_root))
 publish_to: 'none'
 version: 1.0.0+1
 environment:
-  sdk: ^3.12.0
+  sdk: ^3.14.0
+  flutter: '>=3.50.0'
 dependencies:
   duo_rail_kit:
     path: {dependency_path}
   flutter:
     sdk: flutter
+  material_ui: ^1.11.1
 flutter:
   uses-material-design: true
   config:

@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'support/actions.dart';
 import 'support/duo_windows.dart';
 
 /// Records the pushes and pops of the Navigator it observes.
-class _Log extends NavigatorObserver {
+class _Log() extends NavigatorObserver {
   final List<String> events = [];
 
   @override
@@ -201,11 +201,9 @@ void main() {
         MaterialPageRoute<void>(builder: (_) => _savingPage(kind, (saved) => invoke = saved)),
       );
       await tester.pumpAndSettle();
-      unawaited(
-        showDialog<void>(
-          context: navigator.currentContext!,
-          builder: (_) => const AlertDialog(content: Text('Dialog')),
-        ),
+      showDialog<void>(
+        context: navigator.currentContext!,
+        builder: (_) => const AlertDialog(content: Text('Dialog')),
       );
       await tester.pumpAndSettle();
 
@@ -239,11 +237,9 @@ void main() {
       await tester.pumpWidget(duoApp(innerLandscape, navigatorKey: navigator, home: _nested(inner, log)));
       inner.currentState!.push(MaterialPageRoute<void>(builder: (_) => _savingPage(kind, (saved) => invoke = saved)));
       await tester.pumpAndSettle();
-      unawaited(
-        showDialog<void>(
-          context: navigator.currentContext!,
-          builder: (_) => const AlertDialog(content: Text('Dialog')),
-        ),
+      showDialog<void>(
+        context: navigator.currentContext!,
+        builder: (_) => const AlertDialog(content: Text('Dialog')),
       );
       await tester.pumpAndSettle();
       log.events.clear();
@@ -281,12 +277,10 @@ void main() {
 
     // The middle Navigator's top route covers the one that holds the inner Navigator, then the root's.
     for (final covering in [middle, navigator]) {
-      unawaited(
-        showDialog<void>(
-          context: covering.currentContext!,
-          useRootNavigator: false,
-          builder: (_) => const AlertDialog(content: Text('Dialog')),
-        ),
+      showDialog<void>(
+        context: covering.currentContext!,
+        useRootNavigator: false,
+        builder: (_) => const AlertDialog(content: Text('Dialog')),
       );
       await tester.pumpAndSettle();
       expect(find.descendant(of: find.byKey(covering), matching: find.text('Dialog')), findsOneWidget);

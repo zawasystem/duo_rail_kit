@@ -3,42 +3,30 @@ part of '../vertical_bar_toolbar.dart';
 /// What a [VerticalBarPage] below a shell hands to it in its build, compared by value so that an
 /// unchanged page does not lay the shell out again.
 @immutable
-class _ShellRegistration {
-  const _ShellRegistration({
-    required this.route,
-    required this.isCurrent,
-    required this.navigator,
-    required this.slots,
-    required this.back,
-    required this.actions,
-    required this.page,
-    required this.theme,
-  });
-
+class const _ShellRegistration({
   /// The page's route; the shell reads whether it is current or active when it chooses the owner.
-  final PageRoute<Object?> route;
+  required final PageRoute<Object?> route,
 
   /// Whether [route] was current when the page built. A route stops or starts being current without
   /// any other change, as when a push is popped before it completes, so the page registers again.
-  final bool isCurrent;
+  required final bool isCurrent,
 
   /// The page's Navigator.
-  final NavigatorState? navigator;
+  required final NavigatorState? navigator,
 
   /// The slots the page builds with.
-  final VerticalBarSlots slots;
-
-  final BackGlyph? back;
+  required final VerticalBarSlots slots,
+  required final BackGlyph? back,
 
   /// The page's actions with unique ids.
-  final List<VerticalBarAction> actions;
+  required final List<VerticalBarAction> actions,
 
   /// The page's widget, whose builders draw the cells; compared by identity.
-  final VerticalBarPage page;
+  required final VerticalBarPage page,
 
   /// The page's theme, so that a change of it builds the cells again.
-  final ThemeData theme;
-
+  required final ThemeData theme,
+}) {
   /// Whether [route] is current and no back swipe runs in [navigator]. Read live.
   bool get idle => route.isCurrent && !(navigator?.userGestureInProgress ?? false);
 
@@ -69,7 +57,7 @@ class _ShellRegistration {
 }
 
 /// The kinds of debug diagnostics a shell reports, each once.
-enum _ShellDiagnostic {
+enum _ShellDiagnostic() {
   deferredNotification,
   nestedPage,
   ownerTie,
@@ -90,7 +78,7 @@ enum _ShellDiagnostic {
 ///
 /// An unmounted marker ([dropMarker]) and a paint that finds the cells out of date
 /// ([_RenderShellLayout.checkFromPaint]) also lay it out after the frame.
-class _ShellRegistry {
+class _ShellRegistry() {
   /// The shell's layout, while mounted.
   _RenderShellLayout? layout;
 

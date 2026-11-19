@@ -3,7 +3,7 @@ library;
 
 import 'dart:math' as math;
 
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:material_ui/material_ui.dart';
 
 import '../core/horizontal_edge.dart';
 
@@ -21,16 +21,14 @@ typedef VerticalBarItemBuilder = Widget? Function(BuildContext context, Vertical
 
 /// How a vertical bar action was invoked.
 @immutable
-class VerticalBarInvocation {
-  const VerticalBarInvocation({required this.anchor, required this.fromOverflowMenu});
-
+class const VerticalBarInvocation({
   /// The invoking control in window coordinates: the action's cell, or the overflow cell as it was
   /// when its menu opened. Use it as a share-sheet or popover origin.
-  final Rect anchor;
+  required final Rect anchor,
 
   /// Whether the action was chosen from the overflow menu.
-  final bool fromOverflowMenu;
-
+  required final bool fromOverflowMenu,
+}) {
   @override
   bool operator ==(Object other) =>
       other is VerticalBarInvocation && other.anchor == anchor && other.fromOverflowMenu == fromOverflowMenu;
@@ -45,19 +43,12 @@ class VerticalBarInvocation {
 /// One cell of the vertical bar column, passed to the builders of application controls. Values are logical
 /// pixels.
 @immutable
-class VerticalBarCell {
-  const VerticalBarCell({
-    required this.edge,
-    required this.rect,
-    this.invoke,
-    this.overflowed = const <VerticalBarAction>[],
-  });
-
+class const VerticalBarCell({
   /// The column's physical edge; the inner side is the opposite one.
-  final HorizontalEdge edge;
+  required final HorizontalEdge edge,
 
   /// The 48 x 48 cell in window coordinates.
-  final Rect rect;
+  required final Rect rect,
 
   /// Invokes the control with this cell as the anchor: the action's [VerticalBarAction.onPressed],
   /// `Navigator.maybePop` for the back control, or the menu of an action with menu items or of the
@@ -69,12 +60,12 @@ class VerticalBarCell {
   /// [VerticalBarShell], also only while it is the shell's current page and no back swipe runs. A call made
   /// right after an opaque route above the page pops, before the next frame enables the page's tickers
   /// again, acts once that frame has ended.
-  final VoidCallback? invoke;
+  final VoidCallback? invoke,
 
   /// For the overflow cell, the actions in its menu, in order and unmodifiable; empty for every other
   /// cell. Lets an `overflowBuilder` show, for example, a badge that one of them carries.
-  final List<VerticalBarAction> overflowed;
-
+  final List<VerticalBarAction> overflowed = const <VerticalBarAction>[],
+}) {
   /// Places a tooltip beside this cell on the column's inner side, vertically centred and kept inside the
   /// overlay; tooltips above or below would cover the neighbouring cells. Pass it as
   /// `Tooltip.positionDelegate`, with [tooltipConstraints] as `Tooltip.constraints`. The tooltip follows the
@@ -133,7 +124,7 @@ double _defaultTooltipHeight(TargetPlatform platform) => switch (platform) {
 /// One page action shown in the vertical bar column, or in its overflow menu.
 @immutable
 class VerticalBarAction {
-  const VerticalBarAction({
+  const new({
     required this.id,
     required Widget this.icon,
     required this.label,
@@ -148,7 +139,7 @@ class VerticalBarAction {
   /// An application-built control, such as a button with a progress ring or a long-press menu.
   /// [icon] and [label] are used only for its overflow menu row; [onPressed] is called by the cell's
   /// `invoke` and by that row, and null disables both.
-  const VerticalBarAction.custom({
+  const new custom({
     required this.id,
     required this.label,
     required VerticalBarCellBuilder this.cellBuilder,
@@ -194,30 +185,22 @@ class VerticalBarAction {
 
 /// One row of a [VerticalBarAction]'s menu.
 @immutable
-class VerticalBarMenuItem {
-  const VerticalBarMenuItem({
-    required this.label,
-    required this.onSelected,
-    this.icon,
-    this.enabled = true,
-    this.destructive = false,
-  });
-
+class const VerticalBarMenuItem({
   /// The row's text.
-  final String label;
+  required final String label,
 
   /// Called when the row is chosen; not called when the page is gone by then.
-  final VoidCallback onSelected;
+  required final VoidCallback onSelected,
 
   /// Shown before [label] when non-null.
-  final Widget? icon;
+  final Widget? icon,
 
   /// Whether the row can be chosen.
-  final bool enabled;
+  final bool enabled = true,
 
   /// Uses the theme's error colour.
-  final bool destructive;
-}
+  final bool destructive = false,
+});
 
 /// [actions] without the later actions whose id an earlier one already uses, in their order.
 ///

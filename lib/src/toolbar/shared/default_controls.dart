@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:material_ui/material_ui.dart';
 
 import '../vertical_bar_action.dart';
 import '../vertical_bar_column.dart';
@@ -17,14 +17,12 @@ final ButtonStyle _controlStyle = IconButton.styleFrom(
 
 const double _iconSize = 24;
 
-class _DefaultControl extends StatelessWidget {
-  const _DefaultControl({required this.cell, required this.tooltip, required this.icon, this.selected});
-
-  final VerticalBarCell cell;
-  final String tooltip;
-  final Widget icon;
-  final bool? selected;
-
+class const _DefaultControl({
+  required final VerticalBarCell cell,
+  required final String tooltip,
+  required final Widget icon,
+  final bool? selected,
+}) extends StatelessWidget {
   // An empty tooltip, possible only in release builds, adds no tooltip.
   @override
   Widget build(BuildContext context) => Tooltip(
@@ -41,24 +39,19 @@ class _DefaultControl extends StatelessWidget {
   );
 }
 
-class DefaultActionControl extends StatelessWidget {
-  const DefaultActionControl({super.key, required this.action, required this.cell});
-
-  final VerticalBarAction action;
-  final VerticalBarCell cell;
-
+class const DefaultActionControl({
+  super.key,
+  required final VerticalBarAction action,
+  required final VerticalBarCell cell,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) =>
       // Standard actions, the only ones drawn with this, always have an icon.
       _DefaultControl(cell: cell, tooltip: action.label, icon: action.icon!, selected: action.selected);
 }
 
-class DefaultBackControl extends StatelessWidget {
-  const DefaultBackControl({super.key, required this.cell, required this.close});
-
-  final VerticalBarCell cell;
-  final bool close;
-
+class const DefaultBackControl({super.key, required final VerticalBarCell cell, required final bool close})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final localizations = MaterialLocalizations.of(context);
@@ -70,11 +63,7 @@ class DefaultBackControl extends StatelessWidget {
   }
 }
 
-class DefaultOverflowControl extends StatelessWidget {
-  const DefaultOverflowControl({super.key, required this.cell});
-
-  final VerticalBarCell cell;
-
+class const DefaultOverflowControl({super.key, required final VerticalBarCell cell}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => _DefaultControl(
     cell: cell,

@@ -1,8 +1,6 @@
-import 'dart:async';
-
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'support/duo_windows.dart';
 
@@ -359,23 +357,19 @@ void main() {
       }
 
       Future<Rect> showSheet(WidgetTester tester) async {
-        unawaited(
-          showModalBottomSheet<void>(
-            context: pageContext,
-            useSafeArea: true,
-            builder: (context) => const SizedBox(key: ValueKey('sheet'), width: double.infinity, height: 120),
-          ),
+        showModalBottomSheet<void>(
+          context: pageContext,
+          useSafeArea: true,
+          builder: (context) => const SizedBox(key: ValueKey('sheet'), width: double.infinity, height: 120),
         );
         await tester.pumpAndSettle();
         return tester.getRect(find.byKey(const ValueKey('sheet')));
       }
 
       Future<Rect> showAlert(WidgetTester tester) async {
-        unawaited(
-          showDialog<void>(
-            context: pageContext,
-            builder: (context) => const AlertDialog(content: Text('dialog')),
-          ),
+        showDialog<void>(
+          context: pageContext,
+          builder: (context) => const AlertDialog(content: Text('dialog')),
         );
         await tester.pumpAndSettle();
         return tester.getRect(find.byType(AlertDialog));
@@ -419,14 +413,12 @@ void main() {
 }
 
 /// Child used to verify State identity.
-class _Counter extends StatefulWidget {
-  const _Counter();
-
+class const _Counter() extends StatefulWidget {
   @override
   State<_Counter> createState() => _CounterState();
 }
 
-class _CounterState extends State<_Counter> {
+class _CounterState() extends State<_Counter> {
   @override
   Widget build(BuildContext context) => const SizedBox.shrink();
 }

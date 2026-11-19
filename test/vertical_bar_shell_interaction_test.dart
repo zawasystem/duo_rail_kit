@@ -1,10 +1,8 @@
-import 'dart:async';
-
 import 'package:duo_rail_kit/duo_rail_kit.dart';
 import 'package:duo_rail_kit/src/toolbar/vertical_bar_toolbar.dart' show VerticalBarShellDebugStats;
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'support/actions.dart';
 import 'support/cells.dart';
@@ -87,15 +85,11 @@ Widget _savingPage(String kind, void Function(VoidCallback? invoke) save) {
 }
 
 /// What covers or hides the shell's owner, and how it ends.
-enum _Cover {
+enum _Cover(final String during) {
   rootPage('while an opaque root page covers the shell'),
   rootDialog('while a root dialog is open'),
   hiddenBranch('while its branch is hidden'),
   backSwipe('during a back swipe in its branch');
-
-  const _Cover(this.during);
-
-  final String during;
 
   /// Starts this cover and returns what ends it.
   Future<Future<void> Function()> start(WidgetTester tester, ShellHarness harness) async {
@@ -112,11 +106,9 @@ enum _Cover {
           await tester.pumpAndSettle();
         };
       case _Cover.rootDialog:
-        unawaited(
-          showDialog<void>(
-            context: _rootNavigator(tester).context,
-            builder: (_) => const AlertDialog(content: Text('Dialog')),
-          ),
+        showDialog<void>(
+          context: _rootNavigator(tester).context,
+          builder: (_) => const AlertDialog(content: Text('Dialog')),
         );
         await tester.pumpAndSettle();
         return () async {
@@ -277,11 +269,9 @@ void main() {
                   id: 0,
                   icon: const Icon(Icons.star),
                   label: 'Action 0',
-                  onPressed: (invocation) => unawaited(
-                    showDialog<void>(
-                      context: pageContext,
-                      builder: (_) => const AlertDialog(content: Text('Dialog')),
-                    ),
+                  onPressed: (invocation) => showDialog<void>(
+                    context: pageContext,
+                    builder: (_) => const AlertDialog(content: Text('Dialog')),
                   ),
                 ),
                 ...numberedActions(10, icon: _numberedIcon).skip(1),
@@ -483,34 +473,28 @@ void main() {
       (
         'a root bottom sheet',
         'Sheet',
-        (context) => unawaited(
-          showModalBottomSheet<void>(
-            context: context,
-            useRootNavigator: true,
-            isDismissible: false,
-            builder: (_) => const SizedBox(height: 200, child: Center(child: Text('Sheet'))),
-          ),
+        (context) => showModalBottomSheet<void>(
+          context: context,
+          useRootNavigator: true,
+          isDismissible: false,
+          builder: (_) => const SizedBox(height: 200, child: Center(child: Text('Sheet'))),
         ),
       ),
       (
         'a root dialog',
         'Dialog',
-        (context) => unawaited(
-          showDialog<void>(
-            context: context,
-            barrierDismissible: false,
-            builder: (_) => const AlertDialog(content: Text('Dialog')),
-          ),
+        (context) => showDialog<void>(
+          context: context,
+          barrierDismissible: false,
+          builder: (_) => const AlertDialog(content: Text('Dialog')),
         ),
       ),
       (
         'a bottom sheet in the branch',
         'Sheet',
-        (context) => unawaited(
-          showModalBottomSheet<void>(
-            context: context,
-            builder: (_) => const SizedBox(height: 200, child: Center(child: Text('Sheet'))),
-          ),
+        (context) => showModalBottomSheet<void>(
+          context: context,
+          builder: (_) => const SizedBox(height: 200, child: Center(child: Text('Sheet'))),
         ),
       ),
     ]) {
@@ -761,11 +745,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(cellLabels(tester), ['a0', 'b0', 'c0', 'd0']);
       // A bottom sheet in the branch leaves the shell's nodes in the tree; a root popup's barrier hides them.
-      unawaited(
-        showModalBottomSheet<void>(
-          context: harness.branches[0]!.context,
-          builder: (_) => const SizedBox(height: 200, child: Center(child: Text('Sheet'))),
-        ),
+      showModalBottomSheet<void>(
+        context: harness.branches[0]!.context,
+        builder: (_) => const SizedBox(height: 200, child: Center(child: Text('Sheet'))),
       );
       await tester.pumpAndSettle();
       expect(ignoresPointersAbove(tester, find.byTooltip('a0')), isTrue);

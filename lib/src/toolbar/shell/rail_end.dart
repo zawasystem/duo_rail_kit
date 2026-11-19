@@ -13,9 +13,7 @@ part of '../vertical_bar_toolbar.dart';
 /// read when the marker or the shell paints. With a repaint boundary around the marker's Flex and another
 /// between the shell and the part that moved, the cells can stay over the old place until the shell lays
 /// out again.
-class VerticalBarRailEnd extends LeafRenderObjectWidget {
-  const VerticalBarRailEnd({super.key});
-
+class const VerticalBarRailEnd({super.key}) extends LeafRenderObjectWidget {
   @override
   RenderBox createRenderObject(BuildContext context) {
     final marker = _RenderRailEnd()..element = context as Element;
@@ -51,7 +49,7 @@ class VerticalBarRailEnd extends LeafRenderObjectWidget {
 
 /// [VerticalBarRailEnd]'s box: the smallest size its parent allows, without intrinsic size, semantics,
 /// or hit area. It paints nothing; painting asks the shell to check its cells against the rail.
-class _RenderRailEnd extends RenderBox {
+class _RenderRailEnd() extends RenderBox {
   /// The registry of the shell above, if any.
   _ShellRegistry? registry;
 

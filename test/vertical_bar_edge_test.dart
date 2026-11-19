@@ -7,14 +7,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'support/native_channel.dart';
 
 /// Displays inherited edge state and counts State recreation.
-class _Probe extends StatefulWidget {
-  const _Probe();
-
+class const _Probe() extends StatefulWidget {
   @override
   State<_Probe> createState() => _ProbeState();
 }
 
-class _ProbeState extends State<_Probe> {
+class _ProbeState() extends State<_Probe> {
   static int created = 0;
 
   /// Counts inherited notifications; a parent rebuild alone reuses the const probe.

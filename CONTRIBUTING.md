@@ -6,10 +6,9 @@ the maintenance rules. Contributions are made under the [MIT License](LICENSE).
 
 ## Checks
 
-Work in a Git checkout: `.fvmrc`, `tool/` and the workflows are not in the
-pub.dev archive. `.fvmrc` pins the development SDK (Flutter 3.50.0); the
-`pubspec.yaml` lower bound (3.47.8) is the advertised minimum. From the package
-root:
+Work in a Git checkout to use `.fvmrc`, `tool/` and the workflows. The
+development SDK in `.fvmrc` and the minimum in `pubspec.yaml` are both Flutter
+3.50.0 (Dart 3.14.0). From the package root:
 
 ```sh
 fvm flutter pub get
@@ -34,13 +33,13 @@ View and the status display on a Simulator or device.
 ## CI
 
 - [`ci.yml`](https://github.com/zawasystem/duo_rail_kit/blob/main/.github/workflows/ci.yml)
-  checks the package and the example on Ubuntu with Flutter 3.47.8 and 3.50.0.
+  checks the package and the example on Ubuntu with Flutter 3.50.0.
   Its `native_ios` job runs the host build on a GitHub-hosted macOS runner only
   when dispatched from `main` with `native_ios`; it fails without the iOS 27.1
   SDK.
 - [`publish.yml`](https://github.com/zawasystem/duo_rail_kit/blob/main/.github/workflows/publish.yml)
-  runs on stable version tags: `minimum_sdk` (3.47.8) and `validate` (3.50.0,
-  with a publication dry run) run the checks without an OIDC token, then
+  runs on stable version tags. `validate` checks both packages and the
+  publication dry run on Flutter 3.50.0 without an OIDC token, then
   `publish` holds `id-token: write` and runs first-party steps only (checkout,
   tag check, the Flutter SDK at its reviewed commit, `dart-lang/setup-dart`,
   `flutter pub publish --force`). An optional pub.dev environment requirement
@@ -65,8 +64,9 @@ relatively.
 `lib/src` has four one-way layers, `core/`, `edge/`, `layout/` and `toolbar/`;
 each file is ranked by its path: `core/` 0, `edge/` 1, `layout/` 2, `toolbar/`
 3, `toolbar/shared/` 4, and `toolbar/vertical_bar_toolbar.dart` with its parts
-in `toolbar/page/` and `toolbar/shell/` 5. A file imports only `dart:`,
-`package:flutter/` and files of its own or a lower rank, without cycles; parts
+in `toolbar/page/` and `toolbar/shell/` 5. A file can import Dart libraries,
+Flutter, the official Material and Cupertino libraries, and files of its own
+or a lower rank. Internal imports must be acyclic. Parts
 have no imports, and a `/// @docImport` is the only reference that may point
 upwards. The page and the shell are parts of one library because they share a
 private protocol in both directions. `lib/duo_rail_kit.dart` exports each file

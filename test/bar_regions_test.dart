@@ -79,14 +79,12 @@ Map<String, Object?> _with(Map<String, Object> entry, String field, Object? valu
 Map<String, Object?> _without(Map<String, Object> entry, String field) => {...entry}..remove(field);
 
 /// Depends only on the edge scope; counts notifications and State creation.
-class _EdgeProbe extends StatefulWidget {
-  const _EdgeProbe();
-
+class const _EdgeProbe() extends StatefulWidget {
   @override
   State<_EdgeProbe> createState() => _EdgeProbeState();
 }
 
-class _EdgeProbeState extends State<_EdgeProbe> {
+class _EdgeProbeState() extends State<_EdgeProbe> {
   static int created = 0;
   static int builds = 0;
   static HorizontalEdge? edge;
@@ -107,14 +105,12 @@ class _EdgeProbeState extends State<_EdgeProbe> {
 }
 
 /// Depends only on the region scope and the MediaQuery aspects read by `of`.
-class _RegionProbe extends StatefulWidget {
-  const _RegionProbe();
-
+class const _RegionProbe() extends StatefulWidget {
   @override
   State<_RegionProbe> createState() => _RegionProbeState();
 }
 
-class _RegionProbeState extends State<_RegionProbe> {
+class _RegionProbeState() extends State<_RegionProbe> {
   static int created = 0;
   static int builds = 0;
   static TopBarRegion? topBar;

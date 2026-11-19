@@ -1,6 +1,6 @@
 name: duo_rail_kit
 description: Flutter layout helpers and an iOS plugin for system-directed side rails, vertical bar toolbars, and safe-area spacing on iPhone Duo.
-version: 0.2.1
+version: 0.3.0
 repository: https://github.com/zawasystem/duo_rail_kit
 issue_tracker: https://github.com/zawasystem/duo_rail_kit/issues
 topics:
@@ -23,17 +23,19 @@ screenshots:
     path: doc/images/phone.png
 
 environment:
-  sdk: ^3.12.0
-  flutter: '>=3.47.8'
+  sdk: ^3.14.0
+  flutter: '>=3.50.0'
 
 dependencies:
+  cupertino_ui: ^1.1.7
   flutter:
     sdk: flutter
+  material_ui: ^1.11.1
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  pedantic_mono: ^1.38.1
+  pedantic_mono: ^1.39.0
 
 flutter:
   plugin:

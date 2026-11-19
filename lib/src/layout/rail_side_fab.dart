@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:material_ui/material_ui.dart';
 
 /// Shares FAB placement with content beside a bottom-aligned rail that follows the system bar.
 ///
@@ -8,12 +8,13 @@ import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnece
 ///
 /// Always keep this widget in the tree and change only [enabled]; wrapping the content conditionally can recreate its
 /// state. Leave it disabled for width-based rails and bottom bars.
-class RailSideFab extends InheritedWidget {
-  const RailSideFab({super.key, required this.enabled, required super.child});
+class const RailSideFab({
+  super.key,
 
   /// Whether the content is beside a bottom-aligned rail that follows the system bar.
-  final bool enabled;
-
+  required final bool enabled,
+  required super.child,
+}) extends InheritedWidget {
   /// Whether an enabled [RailSideFab] is above [context]; false if absent.
   ///
   /// Use it with [locationOf] to keep content clear of the FAB: when true, reserve the FAB height plus
@@ -37,9 +38,7 @@ class RailSideFab extends InheritedWidget {
 ///
 /// Use `const RailSideFabLocation()`: a new instance is unequal by identity and can start a Scaffold FAB transition on
 /// every rebuild.
-class RailSideFabLocation extends FloatingActionButtonLocation {
-  const RailSideFabLocation();
-
+class const RailSideFabLocation() extends FloatingActionButtonLocation {
   /// The gap between the FAB bottom and the content bottom.
   static const double bottomMargin = 24;
 

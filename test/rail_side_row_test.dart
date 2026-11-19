@@ -3,14 +3,12 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 /// Content probe that counts State recreation.
-class _Content extends StatefulWidget {
-  const _Content();
-
+class const _Content() extends StatefulWidget {
   @override
   State<_Content> createState() => _ContentState();
 }
 
-class _ContentState extends State<_Content> {
+class _ContentState() extends State<_Content> {
   static int created = 0;
 
   @override

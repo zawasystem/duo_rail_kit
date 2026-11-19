@@ -1,28 +1,20 @@
 part of '../vertical_bar_toolbar.dart';
 
-class _ShellParentData extends ContainerBoxParentData<RenderBox> {}
+class _ShellParentData() extends ContainerBoxParentData<RenderBox>;
 
 /// Lays out the shell's row, then its column layer over it.
-class _ShellLayout extends MultiChildRenderObjectWidget {
-  const _ShellLayout({
-    required this.registry,
-    required this.used,
-    required this.ambient,
-    required this.route,
-    required this.routeCurrent,
-    required super.children,
-  });
-
-  final _ShellRegistry registry;
-  final _UsedColumn? used;
-  final FocusTraversalPolicy ambient;
+class const _ShellLayout({
+  required final _ShellRegistry registry,
+  required final _UsedColumn? used,
+  required final FocusTraversalPolicy ambient,
 
   /// The shell's route while the column is used.
-  final ModalRoute<Object?>? route;
+  required final ModalRoute<Object?>? route,
 
   /// Whether [route] was current when the shell built; true without one.
-  final bool routeCurrent;
-
+  required final bool routeCurrent,
+  required super.children,
+}) extends MultiChildRenderObjectWidget {
   @override
   _RenderShellLayout createRenderObject(BuildContext context) {
     final render = _RenderShellLayout(registry, used, ambient, routeCurrent: routeCurrent)..route = route;
@@ -49,15 +41,16 @@ class _ShellLayout extends MultiChildRenderObjectWidget {
 }
 
 /// Children: the row, then the column layer. Paints in that order and hit-tests the layer first.
-class _RenderShellLayout extends RenderBox
+class _RenderShellLayout(
+  /// The pages and markers this shell reads after laying out its row.
+  final _ShellRegistry registry,
+  var _UsedColumn? _used,
+  var FocusTraversalPolicy _ambient, {
+  required var bool _routeCurrent,
+}) extends RenderBox
     with
         ContainerRenderObjectMixin<RenderBox, _ShellParentData>,
         RenderBoxContainerDefaultsMixin<RenderBox, _ShellParentData> {
-  _RenderShellLayout(this.registry, this._used, this._ambient, {required this._routeCurrent});
-
-  /// The pages and markers this shell reads after laying out its row.
-  final _ShellRegistry registry;
-
   /// The shell's route while the column is used, read when an invoke runs and by the debug origin check.
   ModalRoute<Object?>? route;
 
@@ -79,8 +72,6 @@ class _RenderShellLayout extends RenderBox
 
   /// The [_UsedColumn], or null where the shell lays out as a [RailSideRow].
   _UsedColumn? get used => _used;
-  _UsedColumn? _used;
-
   set used(_UsedColumn? value) {
     if (value == _used) {
       return;
@@ -90,8 +81,6 @@ class _RenderShellLayout extends RenderBox
   }
 
   FocusTraversalPolicy get ambient => _ambient;
-  FocusTraversalPolicy _ambient;
-
   set ambient(FocusTraversalPolicy value) {
     if (identical(value, _ambient)) {
       return;
@@ -102,8 +91,6 @@ class _RenderShellLayout extends RenderBox
 
   /// Whether the shell's route was current when it built; the cells are inert while it is not.
   bool get routeCurrent => _routeCurrent;
-  bool _routeCurrent;
-
   set routeCurrent(bool value) {
     if (value == _routeCurrent) {
       return;
@@ -560,28 +547,13 @@ class _RenderShellLayout extends RenderBox
 typedef _RailReading = ({double top, double centre});
 
 /// A registered marker below the shell, as [_RenderShellLayout._scanMarkers] found it.
-sealed class _MarkerEntry {
-  const _MarkerEntry();
-}
+sealed class const _MarkerEntry();
 
 /// A marker whose parent is not a [Flex]; it is not read.
-final class _MarkerOutsideFlex extends _MarkerEntry {
-  const _MarkerOutsideFlex(this.parent);
-
-  final RenderObject? parent;
-}
+final class const _MarkerOutsideFlex(final RenderObject? parent) extends _MarkerEntry;
 
 /// A marker in a [Flex] that is not laid out yet.
-final class _MarkerNotLaidOut extends _MarkerEntry {
-  const _MarkerNotLaidOut(this.marker);
-
-  final _RenderRailEnd marker;
-}
+final class const _MarkerNotLaidOut(final _RenderRailEnd marker) extends _MarkerEntry;
 
 /// A laid-out marker in [flex], read as [reading].
-final class _MarkerRead extends _MarkerEntry {
-  const _MarkerRead(this.flex, this.reading);
-
-  final RenderFlex flex;
-  final _RailReading reading;
-}
+final class const _MarkerRead(final RenderFlex flex, final _RailReading reading) extends _MarkerEntry;

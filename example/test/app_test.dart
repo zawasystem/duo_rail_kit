@@ -2,9 +2,9 @@ import 'dart:math' as math;
 
 import 'package:duo_rail_kit/duo_rail_kit.dart';
 import 'package:duo_rail_kit_example/main.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The iPhone Duo inner portrait band beside the status display. Recorded on the iOS 27.2 Simulator.
 const TopBarRegion _innerPortraitBand = TopBarRegion(

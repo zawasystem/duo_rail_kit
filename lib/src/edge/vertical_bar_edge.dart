@@ -15,11 +15,7 @@ import 'bar_regions.dart';
 /// Wrap the application once, outside `SideStatusBarInsets`, which also needs the edge:
 /// `VerticalBarEdge(child: SideStatusBarInsets(child: ...))`. Read the values with [of], [statusBarHiddenOf],
 /// [TopBarRegion.of], and [VerticalBarRegion.of].
-class VerticalBarEdge extends StatefulWidget {
-  const VerticalBarEdge({super.key, required this.child});
-
-  final Widget child;
-
+class const VerticalBarEdge({super.key, required final Widget child}) extends StatefulWidget {
   /// The channel shared with `DuoRailKitPlugin.swift`; keep both sides in sync.
   @visibleForTesting
   static const MethodChannel channel = MethodChannel('com.zawasystem.fleet/vertical_bar_edge');
@@ -65,7 +61,7 @@ class VerticalBarEdge extends StatefulWidget {
   State<VerticalBarEdge> createState() => _VerticalBarEdgeState();
 }
 
-class _VerticalBarEdgeState extends State<VerticalBarEdge> with WidgetsBindingObserver {
+class _VerticalBarEdgeState() extends State<VerticalBarEdge> with WidgetsBindingObserver {
   /// The channel handler's owner; only it removes the handler, as a new state's initState can precede the old dispose.
   static _VerticalBarEdgeState? _channelOwner;
 
@@ -193,15 +189,16 @@ class _VerticalBarEdgeState extends State<VerticalBarEdge> with WidgetsBindingOb
 typedef _Sample = ({HorizontalEdge? edge, bool statusBarHidden, TopBarRegion? topBar, VerticalBarRegion? verticalBar});
 
 /// Provides edge values to descendants; tests can inject a scope directly.
-class VerticalBarEdgeScope extends InheritedWidget {
-  const VerticalBarEdgeScope({super.key, required this.edge, this.statusBarHidden = false, required super.child});
+class const VerticalBarEdgeScope({
+  super.key,
 
   /// The physical native edge, or null when no vertical bar is used.
-  final HorizontalEdge? edge;
+  required final HorizontalEdge? edge,
 
   /// Sampled status bar visibility; see [VerticalBarEdge.statusBarHiddenOf].
-  final bool statusBarHidden;
-
+  final bool statusBarHidden = false,
+  required super.child,
+}) extends InheritedWidget {
   @override
   bool updateShouldNotify(VerticalBarEdgeScope oldWidget) =>
       oldWidget.edge != edge || oldWidget.statusBarHidden != statusBarHidden;

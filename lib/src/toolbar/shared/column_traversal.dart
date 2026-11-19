@@ -6,15 +6,13 @@ import 'package:flutter/widgets.dart';
 /// Unlike an [OrderedTraversalPolicy] with an order on each layer, it needs no focus orders: both layers
 /// see the orders around the page, such as an application shell's around its Navigator, which can then
 /// neither move the column after the page nor be compared with an order of another type.
-class ColumnFirstTraversalPolicy extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
-  ColumnFirstTraversalPolicy({required this.secondary, required this.isColumn});
-
+class ColumnFirstTraversalPolicy({
   /// The ambient policy, which also sorts each layer's own group.
-  final FocusTraversalPolicy secondary;
+  required final FocusTraversalPolicy secondary,
 
   /// Whether a member of the group is the column layer's group.
-  final bool Function(FocusNode node) isColumn;
-
+  required final bool Function(FocusNode node) isColumn,
+}) extends FocusTraversalPolicy with DirectionalFocusTraversalPolicyMixin {
   @override
   Iterable<FocusNode> sortDescendants(Iterable<FocusNode> descendants, FocusNode currentNode) {
     final sorted = secondary.sortDescendants(descendants, currentNode).toList();
@@ -23,12 +21,10 @@ class ColumnFirstTraversalPolicy extends FocusTraversalPolicy with DirectionalFo
 }
 
 /// The policies of a page or a shell, kept across frames so that their traversal history survives rebuilds.
-class TraversalPolicies {
-  TraversalPolicies({required this.isColumn});
-
+class TraversalPolicies({
   /// Passed to the [ColumnFirstTraversalPolicy]: whether a node is the column layer's group.
-  final bool Function(FocusNode node) isColumn;
-
+  required final bool Function(FocusNode node) isColumn,
+}) {
   FocusTraversalPolicy? _fallback;
   ColumnFirstTraversalPolicy? _columnFirst;
 

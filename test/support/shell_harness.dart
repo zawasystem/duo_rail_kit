@@ -1,44 +1,36 @@
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'duo_windows.dart';
 import 'traversal.dart';
 
 /// Which rail a [ShellHost] draws.
-enum HarnessRailKind { navigationRail, scrolling, movable }
+enum HarnessRailKind() {
+  navigationRail,
+  scrolling,
+  movable,
+}
 
 /// A rail fixture: a bottom-aligned [NavigationRail], a custom scrolling rail, or a rail with a relayout
 /// boundary inside.
 @immutable
-class HarnessRail {
-  const HarnessRail._(
-    this.kind, {
-    this.destinations = 4,
-    this.labelType = NavigationRailLabelType.all,
-    this.groupAlignment = 1,
-    this.scrollable = true,
-    this.minWidth = 84,
-    this.movableItems = MovableItems.plain,
-    this.width = 84,
-  });
-
-  final HarnessRailKind kind;
+class const HarnessRail._(
+  final HarnessRailKind kind, {
 
   /// Destinations of a [NavigationRail], or items of the other rails (always 4).
-  final int destinations;
-
-  final NavigationRailLabelType labelType;
-  final double groupAlignment;
-  final bool scrollable;
-  final double minWidth;
+  final int destinations = 4,
+  final NavigationRailLabelType labelType = NavigationRailLabelType.all,
+  final double groupAlignment = 1,
+  final bool scrollable = true,
+  final double minWidth = 84,
 
   /// What holds the movable rail's items Column.
-  final MovableItems movableItems;
+  final MovableItems movableItems = MovableItems.plain,
 
   /// The width of a [NavigationRail]'s box, or of the scrolling rail and its destinations.
-  final double width;
-}
+  final double width = 84,
+});
 
 /// A [NavigationRail] in a `SizedBox(width: width)`, bottom-aligned by default.
 HarnessRail navigationRail({
@@ -68,7 +60,7 @@ HarnessRail scrollingRailWithWidth(double width) => HarnessRail._(HarnessRailKin
 const HarnessRail movableRail = HarnessRail._(HarnessRailKind.movable);
 
 /// What holds the items Column of [MovableRail].
-enum MovableItems {
+enum MovableItems() {
   /// Nothing: the Column sits in the rail's outer Column.
   plain,
 
@@ -83,11 +75,17 @@ enum MovableItems {
 HarnessRail movableRailWith(MovableItems items) => HarnessRail._(HarnessRailKind.movable, movableItems: items);
 
 /// How the branches are shown: an indexed stack or a fade-through.
-enum ShellContainer { indexedStack, fadeThrough }
+enum ShellContainer() {
+  indexedStack,
+  fadeThrough,
+}
 
 /// Where the shell sits: in a `Scaffold(resizeToAvoidBottomInset: true)` body, or directly in the route
 /// beside a rail that pads the keyboard itself.
-enum ShellShape { inBody, outside }
+enum ShellShape() {
+  inBody,
+  outside,
+}
 
 /// The labels of each branch's actions: Home with four, a second tab with two, and Settings with none.
 const List<List<String>> defaultBranchActions = [
@@ -130,7 +128,7 @@ Widget miniPlayerAround(BuildContext context, Widget? child) => Column(
 
 /// Keys and States of one harness app, the taps its controls recorded, and the slots its pages built
 /// with.
-class ShellHarness {
+class ShellHarness() {
   final GlobalKey<ShellHostState> hostKey = GlobalKey<ShellHostState>();
   final GlobalKey<MovableRailState> movableKey = GlobalKey<MovableRailState>();
   final Map<int, BranchRootState> branches = <int, BranchRootState>{};
@@ -217,56 +215,37 @@ Widget shellApp(
 );
 
 /// The shell, its rail, and its branches; see [shellApp].
-class ShellHost extends StatefulWidget {
-  const ShellHost({
-    super.key,
-    required this.harness,
-    required this.railEdge,
-    required this.rail,
-    required this.container,
-    required this.shape,
-    required this.reservesBack,
-    required this.enabled,
-    required this.pagesInLayoutBuilder,
-    required this.textField,
-    required this.plain,
-    required this.playerBelowShell,
-    required this.floatingButton,
-    required this.marker,
-    this.contentSemanticsContainer = false,
-    required this.branchActions,
-    required this.branchPage,
-  });
-
-  final ShellHarness harness;
-  final HorizontalEdge? railEdge;
-  final HarnessRail rail;
-  final ShellContainer container;
-  final ShellShape shape;
-  final bool reservesBack;
-  final bool enabled;
-  final bool pagesInLayoutBuilder;
-  final bool textField;
-  final bool plain;
-  final bool playerBelowShell;
+class const ShellHost({
+  super.key,
+  required final ShellHarness harness,
+  required final HorizontalEdge? railEdge,
+  required final HarnessRail rail,
+  required final ShellContainer container,
+  required final ShellShape shape,
+  required final bool reservesBack,
+  required final bool enabled,
+  required final bool pagesInLayoutBuilder,
+  required final bool textField,
+  required final bool plain,
+  required final bool playerBelowShell,
 
   /// Only with [ShellShape.inBody].
-  final bool floatingButton;
+  required final bool floatingButton,
 
   /// Whether the shell's rail holds a [VerticalBarRailEnd]; never with [plain].
-  final bool marker;
+  required final bool marker,
 
   /// Whether the branches sit in a `Semantics(container: true)`, which keeps the routes' modal barriers
   /// from hiding a rail painted before them.
-  final bool contentSemanticsContainer;
-  final List<List<String>> branchActions;
-  final BranchPageBuilder? branchPage;
-
+  final bool contentSemanticsContainer = false,
+  required final List<List<String>> branchActions,
+  required final BranchPageBuilder? branchPage,
+}) extends StatefulWidget {
   @override
   State<ShellHost> createState() => ShellHostState();
 }
 
-class ShellHostState extends State<ShellHost> {
+class ShellHostState() extends State<ShellHost> {
   /// The selected branch.
   int index = 0;
 
@@ -451,29 +430,22 @@ class ShellHostState extends State<ShellHost> {
 
 /// A rail with a relayout boundary inside (a tight SizedBox), whose items move without relaying out
 /// the shell.
-class MovableRail extends StatefulWidget {
-  const MovableRail({
-    super.key,
-    required this.selected,
-    required this.onSelected,
-    required this.marker,
-    this.items = MovableItems.plain,
-  });
-
-  final int selected;
-  final ValueChanged<int> onSelected;
+class const MovableRail({
+  super.key,
+  required final int selected,
+  required final ValueChanged<int> onSelected,
 
   /// Whether the items' Column ends with a [VerticalBarRailEnd].
-  final bool marker;
+  required final bool marker,
 
   /// What holds the items' Column.
-  final MovableItems items;
-
+  final MovableItems items = MovableItems.plain,
+}) extends StatefulWidget {
   @override
   State<MovableRail> createState() => MovableRailState();
 }
 
-class MovableRailState extends State<MovableRail> {
+class MovableRailState() extends State<MovableRail> {
   double gap = 34;
 
   /// Whether the items' Column ends with a [VerticalBarRailEnd]: the widget's until [setMarker].
@@ -520,12 +492,8 @@ class MovableRailState extends State<MovableRail> {
 }
 
 /// The branch container of go_router's indexed-stack shell: hidden branches offstage, tickers disabled.
-class GoRouterIndexedStack extends StatelessWidget {
-  const GoRouterIndexedStack({super.key, required this.currentIndex, required this.children});
-
-  final int currentIndex;
-  final List<Widget> children;
-
+class const GoRouterIndexedStack({super.key, required final int currentIndex, required final List<Widget> children})
+    extends StatelessWidget {
   @override
   Widget build(BuildContext context) => IndexedStack(
     index: currentIndex,
@@ -540,17 +508,13 @@ class GoRouterIndexedStack extends StatelessWidget {
 }
 
 /// A branch container that fades between branches and disables tickers in hidden ones.
-class BranchFadeThrough extends StatefulWidget {
-  const BranchFadeThrough({super.key, required this.currentIndex, required this.children});
-
-  final int currentIndex;
-  final List<Widget> children;
-
+class const BranchFadeThrough({super.key, required final int currentIndex, required final List<Widget> children})
+    extends StatefulWidget {
   @override
   State<BranchFadeThrough> createState() => _BranchFadeThroughState();
 }
 
-class _BranchFadeThroughState extends State<BranchFadeThrough> with SingleTickerProviderStateMixin {
+class _BranchFadeThroughState() extends State<BranchFadeThrough> with SingleTickerProviderStateMixin {
   late final AnimationController _controller = AnimationController(
     vsync: this,
     duration: Durations.medium1,
@@ -612,36 +576,26 @@ class _BranchFadeThroughState extends State<BranchFadeThrough> with SingleTicker
 
 /// A branch's first page: a [VerticalBarPage] whose app bar keeps its actions unless the slots are
 /// active. Its actions and app-bar buttons record their taps in [ShellHarness.taps].
-class BranchRoot extends StatefulWidget {
-  const BranchRoot({
-    super.key,
-    required this.harness,
-    required this.index,
-    required this.actions,
-    required this.inLayoutBuilder,
-    required this.textField,
-    this.page,
-  });
-
-  final ShellHarness harness;
-  final int index;
+class const BranchRoot({
+  super.key,
+  required final ShellHarness harness,
+  required final int index,
 
   /// The labels, which are also the ids, of the page's actions.
-  final List<String> actions;
+  required final List<String> actions,
 
   /// Builds the page inside the root's own LayoutBuilder, so its cell updates arrive a frame late.
-  final bool inLayoutBuilder;
-
-  final bool textField;
+  required final bool inLayoutBuilder,
+  required final bool textField,
 
   /// Builds the page in place of a [harnessPage].
-  final BranchPageBuilder? page;
-
+  final BranchPageBuilder? page,
+}) extends StatefulWidget {
   @override
   State<BranchRoot> createState() => BranchRootState();
 }
 
-class BranchRootState extends State<BranchRoot> {
+class BranchRootState() extends State<BranchRoot> {
   late List<String> actions = widget.actions;
 
   void setActions(List<String> value) => setState(() => actions = value);

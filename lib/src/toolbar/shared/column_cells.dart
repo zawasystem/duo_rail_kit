@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:flutter/widgets.dart';
 
 import '../../core/horizontal_edge.dart';
 import '../vertical_bar_action.dart';
@@ -10,7 +10,10 @@ import 'column_menus.dart';
 import 'default_controls.dart';
 
 /// Which back glyph the column shows.
-enum BackGlyph { back, close }
+enum BackGlyph() {
+  back,
+  close,
+}
 
 /// The column's content in one frame.
 typedef ColumnLayout = ({
@@ -21,34 +24,25 @@ typedef ColumnLayout = ({
 });
 
 /// The column's group decorations and cells for [layout], drawn with the page's builders for [owner].
-class ColumnCells extends StatelessWidget {
-  const ColumnCells({
-    super.key,
-    required this.layout,
-    required this.itemBuilder,
-    required this.backBuilder,
-    required this.overflowBuilder,
-    required this.groupDecoration,
-    required this.owner,
-  });
+class const ColumnCells({
+  super.key,
 
   /// The column's content, or null for no cells.
-  final ColumnLayout? layout;
+  required final ColumnLayout? layout,
 
   /// The page's `VerticalBarPage.itemBuilder`.
-  final VerticalBarItemBuilder? itemBuilder;
+  required final VerticalBarItemBuilder? itemBuilder,
 
   /// The page's `VerticalBarPage.backBuilder`.
-  final VerticalBarCellBuilder? backBuilder;
+  required final VerticalBarCellBuilder? backBuilder,
 
   /// The page's `VerticalBarPage.overflowBuilder`.
-  final VerticalBarCellBuilder? overflowBuilder;
+  required final VerticalBarCellBuilder? overflowBuilder,
 
   /// The page's `VerticalBarPage.groupDecoration`.
-  final Decoration? groupDecoration;
-
-  final CellOwner owner;
-
+  required final Decoration? groupDecoration,
+  required final CellOwner owner,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final layout = this.layout;
@@ -156,18 +150,21 @@ class ColumnCells extends StatelessWidget {
   );
 }
 
-enum _ColumnChild { group, back, action, overflow }
+enum _ColumnChild() {
+  group,
+  back,
+  action,
+  overflow,
+}
 
 /// Keys the children of the column layer; kinds never collide with each other or with action ids.
 @immutable
-class _ColumnKey extends LocalKey {
-  const _ColumnKey(this.kind, [this.value]);
-
-  final _ColumnChild kind;
+class const _ColumnKey(
+  final _ColumnChild kind, [
 
   /// The action id or the group index.
-  final Object? value;
-
+  final Object? value,
+]) extends LocalKey {
   @override
   bool operator ==(Object other) => other is _ColumnKey && other.kind == kind && other.value == value;
 

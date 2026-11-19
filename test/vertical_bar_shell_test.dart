@@ -1,11 +1,10 @@
-import 'dart:async';
 import 'dart:math' as math;
 
+import 'package:cupertino_ui/cupertino_ui.dart' show CupertinoSheetRoute;
 import 'package:duo_rail_kit/duo_rail_kit.dart';
 import 'package:duo_rail_kit/src/toolbar/vertical_bar_toolbar.dart' show VerticalBarShellDebugStats;
-import 'package:flutter/cupertino.dart' show CupertinoSheetRoute; // ignore: deprecated_member_use, unnecessary_ignore
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 import 'support/actions.dart';
 import 'support/cells.dart';
@@ -62,7 +61,7 @@ Widget _railApp(ShellHarness harness, Widget rail) => duoApp(
 );
 
 /// Records what [VerticalBarShell.railPaddingOf] returned to a rail, and how often the rail built.
-class _ProbeRecord {
+class _ProbeRecord() {
   int builds = 0;
 
   /// For [_probeInput].
@@ -73,11 +72,7 @@ class _ProbeRecord {
 }
 
 /// A rail that only asks the shell for its padding, given [_probeInput] and [_noTopInput].
-class _Probe extends StatelessWidget {
-  const _Probe(this.record);
-
-  final _ProbeRecord record;
-
+class const _Probe(final _ProbeRecord record) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     record
@@ -95,18 +90,14 @@ const EdgeInsets _probeInput = EdgeInsets.only(top: 152, bottom: 34);
 const EdgeInsets _noTopInput = EdgeInsets.only(bottom: 34);
 
 /// A focusable sibling beside the shell in the "unchanged" fixtures.
-enum _Sibling {
+enum _Sibling(final String suffix) {
   none(''),
 
   /// [miniPlayerAround]: read by screen readers, outside the route's focus scope.
   belowNavigator(', with a focusable sibling below the Navigator'),
 
   /// `shellApp(playerBelowShell: true)`: in the route's focus scope, below every rail and content item.
-  belowShell(', with a focusable sibling below the shell in its route');
-
-  const _Sibling(this.suffix);
-
-  final String suffix;
+  belowShell(', with a focusable sibling below the shell in its route'),
 }
 
 /// Pumps a shell with a [_Probe] rail for [window] and returns the probe's record.
@@ -1130,12 +1121,10 @@ void main() {
       for (final (label, open) in <(String, void Function(BuildContext context, Widget page))>[
         (
           'a bottom sheet',
-          (context, page) => unawaited(
-            showModalBottomSheet<void>(
-              context: context,
-              isScrollControlled: true,
-              builder: (_) => SizedBox(height: 400, child: page),
-            ),
+          (context, page) => showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => SizedBox(height: 400, child: page),
           ),
         ),
         (
@@ -1144,14 +1133,12 @@ void main() {
         ),
         (
           'a Navigator in a bottom sheet',
-          (context, page) => unawaited(
-            showModalBottomSheet<void>(
-              context: context,
-              isScrollControlled: true,
-              builder: (_) => SizedBox(
-                height: 400,
-                child: Navigator(onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => page)),
-              ),
+          (context, page) => showModalBottomSheet<void>(
+            context: context,
+            isScrollControlled: true,
+            builder: (_) => SizedBox(
+              height: 400,
+              child: Navigator(onGenerateRoute: (_) => MaterialPageRoute<void>(builder: (_) => page)),
             ),
           ),
         ),

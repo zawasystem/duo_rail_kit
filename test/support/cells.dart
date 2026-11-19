@@ -1,6 +1,6 @@
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// The cells on screen, top to bottom: the tooltip of each cell control and its rectangle. App bar
 /// buttons are left out.

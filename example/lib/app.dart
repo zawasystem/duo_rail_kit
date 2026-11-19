@@ -1,5 +1,5 @@
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
+import 'package:material_ui/material_ui.dart';
 
 const _ink = Color(0xFF142F38);
 const _teal = Color(0xFF087F73);
@@ -45,9 +45,7 @@ ThemeData _theme() => ThemeData(
 );
 
 /// Runs the example using the actual window and native edge.
-class DuoRailExampleApp extends StatelessWidget {
-  const DuoRailExampleApp({super.key});
-
+class const DuoRailExampleApp({super.key}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'Duo Rail Kit',
@@ -64,35 +62,22 @@ class DuoRailExampleApp extends StatelessWidget {
 /// Renders labelled, simulated layouts for tests and local previews.
 ///
 /// Bypasses the native plugin. Set the test view's logical size to [size].
-class DuoRailPreviewApp extends StatelessWidget {
-  const DuoRailPreviewApp({
-    super.key,
-    required this.size,
-    required this.safeArea,
-    this.edge,
-    this.statusBarHidden = false,
-    this.label = 'Layout preview',
-    this.textScale = 1,
-    this.viewInsets = EdgeInsets.zero,
-    this.textDirection = TextDirection.ltr,
-    this.topBar,
-    this.verticalBar,
-  });
-
-  final Size size;
-  final EdgeInsets safeArea;
-  final HorizontalEdge? edge;
-  final bool statusBarHidden;
+class const DuoRailPreviewApp({
+  super.key,
+  required final Size size,
+  required final EdgeInsets safeArea,
+  final HorizontalEdge? edge,
+  final bool statusBarHidden = false,
+  final String label = 'Layout preview',
+  final double textScale = 1,
+  final EdgeInsets viewInsets = EdgeInsets.zero,
+  final TextDirection textDirection = TextDirection.ltr,
 
   /// Simulated system bar regions. They apply only when their view sizes match [size] and a [topBar]'s safeTop
   /// matches the top safe area; otherwise the readout shows none and the app bar stays below the safe area.
-  final TopBarRegion? topBar;
-  final VerticalBarRegion? verticalBar;
-  final String label;
-  final double textScale;
-  final EdgeInsets viewInsets;
-  final TextDirection textDirection;
-
+  final TopBarRegion? topBar,
+  final VerticalBarRegion? verticalBar,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => MaterialApp(
     title: 'Duo Rail Kit · simulated layout',
@@ -130,10 +115,7 @@ const List<({IconData icon, IconData selectedIcon, String label, String title})>
   (icon: Icons.code_rounded, selectedIcon: Icons.code_rounded, label: 'About', title: 'About the kit'),
 ];
 
-class _DemoShell extends StatefulWidget {
-  const _DemoShell({this.previewLabel});
-  final String? previewLabel;
-
+class const _DemoShell({final String? previewLabel}) extends StatefulWidget {
   @override
   State<_DemoShell> createState() => _DemoShellState();
 }
@@ -141,7 +123,7 @@ class _DemoShell extends StatefulWidget {
 /// The numbers of rail tabs the State lab offers; tabs after the third are placeholders.
 const List<int> _railTabCounts = [3, 5, 6, 7];
 
-class _DemoShellState extends State<_DemoShell> {
+class _DemoShellState() extends State<_DemoShell> {
   int _selected = 0;
   int _railTabs = 3;
 
@@ -234,22 +216,14 @@ class _DemoShellState extends State<_DemoShell> {
   static Widget _railLabel(String label) => Text(label, maxLines: 1, softWrap: false, overflow: TextOverflow.ellipsis);
 }
 
-class _LayoutMetrics {
-  const _LayoutMetrics({
-    required this.placement,
-    required this.occupiedWidth,
-    required this.top,
-    required this.addedTop,
-    required this.topBar,
-    required this.verticalBar,
-  });
-  final RailPlacement? placement;
-  final double occupiedWidth;
-  final double top;
-  final double addedTop;
-  final TopBarRegion? topBar;
-  final VerticalBarRegion? verticalBar;
-
+class const _LayoutMetrics({
+  required final RailPlacement? placement,
+  required final double occupiedWidth,
+  required final double top,
+  required final double addedTop,
+  required final TopBarRegion? topBar,
+  required final VerticalBarRegion? verticalBar,
+}) {
   String get side => switch (placement?.edge) {
     HorizontalEdge.left => 'Left rail',
     HorizontalEdge.right => 'Right rail',
@@ -285,29 +259,20 @@ class _LayoutMetrics {
   static String _points(double value) => value == value.roundToDouble() ? '${value.toInt()}' : value.toStringAsFixed(1);
 }
 
-class _DemoContent extends StatefulWidget {
-  const _DemoContent({
-    required this.selected,
-    required this.onSelected,
-    required this.railTabs,
-    required this.onRailTabsChanged,
-    required this.metrics,
-    required this.pane,
-    this.previewLabel,
-  });
-  final int selected;
-  final ValueChanged<int> onSelected;
-  final int railTabs;
-  final ValueChanged<int> onRailTabsChanged;
-  final _LayoutMetrics metrics;
-  final Rect pane;
-  final String? previewLabel;
-
+class const _DemoContent({
+  required final int selected,
+  required final ValueChanged<int> onSelected,
+  required final int railTabs,
+  required final ValueChanged<int> onRailTabsChanged,
+  required final _LayoutMetrics metrics,
+  required final Rect pane,
+  final String? previewLabel,
+}) extends StatefulWidget {
   @override
   State<_DemoContent> createState() => _DemoContentState();
 }
 
-class _DemoContentState extends State<_DemoContent> {
+class _DemoContentState() extends State<_DemoContent> {
   final _note = TextEditingController();
   final _scroll = ScrollController();
   int _taps = 0;
@@ -614,26 +579,17 @@ class _DemoContentState extends State<_DemoContent> {
 ///
 /// The same widgets are built with or without a band; only padding and heights change, so the app bar and its
 /// actions, including their focus, are not recreated when a band appears or disappears.
-class _DemoAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _DemoAppBar({
-    required this.band,
-    required this.pane,
-    required this.title,
-    required this.actions,
-    this.automaticallyImplyLeading = true,
-    this.centerTitle,
-  });
-
+class const _DemoAppBar({
   /// Read with TopBarRegion.of where the window's top padding is intact.
-  final TopBarRegion? band;
+  required final TopBarRegion? band,
 
   /// The content pane in window coordinates.
-  final Rect pane;
-  final String title;
-  final List<Widget> actions;
-  final bool automaticallyImplyLeading;
-  final bool? centerTitle;
-
+  required final Rect pane,
+  required final String title,
+  required final List<Widget> actions,
+  final bool automaticallyImplyLeading = true,
+  final bool? centerTitle,
+}) extends StatelessWidget implements PreferredSizeWidget {
   // The Scaffold adds the top safe area to this height. A band lies inside that area, so it adds nothing.
   @override
   Size get preferredSize => Size.fromHeight(band == null ? kToolbarHeight : 0);
@@ -674,15 +630,12 @@ const List<({String id, IconData icon, String label})> _extraActions = [
 
 /// A full-window pushed page. Where iOS reports a vertical bar column, VerticalBarPage draws its back control and
 /// actions there, at UIKit's positions; elsewhere its app bar keeps them.
-class _DetailPage extends StatefulWidget {
-  const _DetailPage({this.previewLabel});
-  final String? previewLabel;
-
+class const _DetailPage({final String? previewLabel}) extends StatefulWidget {
   @override
   State<_DetailPage> createState() => _DetailPageState();
 }
 
-class _DetailPageState extends State<_DetailPage> {
+class _DetailPageState() extends State<_DetailPage> {
   bool _favorite = false;
   bool _moreActions = false;
   String _lastAction = 'None yet';
@@ -809,25 +762,18 @@ class _DetailPageState extends State<_DetailPage> {
   ).showSnackBar(const SnackBar(content: Text('Delete chosen. The example deletes nothing.')));
 }
 
-class _DetailBody extends StatefulWidget {
-  const _DetailBody({
-    required this.previewLabel,
-    required this.inColumn,
-    required this.moreActions,
-    required this.onMoreActionsChanged,
-    required this.lastAction,
-  });
-  final String? previewLabel;
-  final bool inColumn;
-  final bool moreActions;
-  final ValueChanged<bool> onMoreActionsChanged;
-  final String lastAction;
-
+class const _DetailBody({
+  required final String? previewLabel,
+  required final bool inColumn,
+  required final bool moreActions,
+  required final ValueChanged<bool> onMoreActionsChanged,
+  required final String lastAction,
+}) extends StatefulWidget {
   @override
   State<_DetailBody> createState() => _DetailBodyState();
 }
 
-class _DetailBodyState extends State<_DetailBody> {
+class _DetailBodyState() extends State<_DetailBody> {
   // Kept below VerticalBarPage, so it shows that the page keeps its state when the column appears or disappears.
   int _taps = 0;
 
@@ -908,10 +854,7 @@ class _DetailBodyState extends State<_DetailBody> {
   );
 }
 
-class _Header extends StatelessWidget {
-  const _Header({this.previewLabel});
-  final String? previewLabel;
-
+class const _Header({final String? previewLabel}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const brand = Row(
@@ -977,10 +920,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-class _HeroCard extends StatelessWidget {
-  const _HeroCard({required this.placement});
-  final RailPlacement? placement;
-
+class const _HeroCard({required final RailPlacement? placement}) extends StatelessWidget {
   static const _oneLineTitle = 'At home on every edge.';
 
   static bool _fitsOneLine(BuildContext context, String text, TextStyle style, double width) {
@@ -1045,11 +985,7 @@ class _HeroCard extends StatelessWidget {
   );
 }
 
-class _LayoutSketch extends StatelessWidget {
-  const _LayoutSketch({required this.edge, required this.height});
-  final HorizontalEdge? edge;
-  final double height;
-
+class const _LayoutSketch({required final HorizontalEdge? edge, required final double height}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ExcludeSemantics(
     child: SizedBox(
@@ -1060,10 +996,7 @@ class _LayoutSketch extends StatelessWidget {
   );
 }
 
-class _LayoutSketchPainter extends CustomPainter {
-  const _LayoutSketchPainter(this.edge);
-  final HorizontalEdge? edge;
-
+class const _LayoutSketchPainter(final HorizontalEdge? edge) extends CustomPainter {
   @override
   void paint(Canvas canvas, Size size) {
     final paint = Paint();
@@ -1112,10 +1045,7 @@ class _LayoutSketchPainter extends CustomPainter {
 
 const _minMetricWidth = 220.0;
 
-class _MetricsCards extends StatelessWidget {
-  const _MetricsCards({required this.metrics});
-  final _LayoutMetrics metrics;
-
+class const _MetricsCards({required final _LayoutMetrics metrics}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => LayoutBuilder(
     builder: (context, constraints) {
@@ -1171,20 +1101,13 @@ class _MetricsCards extends StatelessWidget {
   );
 }
 
-class _Metric extends StatelessWidget {
-  const _Metric({
-    required this.width,
-    required this.icon,
-    required this.title,
-    required this.value,
-    required this.detail,
-  });
-  final double width;
-  final IconData icon;
-  final String title;
-  final String value;
-  final String detail;
-
+class const _Metric({
+  required final double width,
+  required final IconData icon,
+  required final String title,
+  required final String value,
+  required final String detail,
+}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => SizedBox(
     width: width,
@@ -1206,11 +1129,7 @@ class _Metric extends StatelessWidget {
   );
 }
 
-class _Panel extends StatelessWidget {
-  const _Panel({required this.child, this.padding = 24});
-  final Widget child;
-  final double padding;
-
+class const _Panel({required final Widget child, final double padding = 24}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Container(
     padding: EdgeInsets.all(padding),
@@ -1223,10 +1142,7 @@ class _Panel extends StatelessWidget {
   );
 }
 
-class _Eyebrow extends StatelessWidget {
-  const _Eyebrow(this.text);
-  final String text;
-
+class const _Eyebrow(final String text) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     text,
@@ -1234,11 +1150,7 @@ class _Eyebrow extends StatelessWidget {
   );
 }
 
-class _CountLabel extends StatelessWidget {
-  const _CountLabel({required this.count, this.large = false});
-  final int count;
-  final bool large;
-
+class const _CountLabel({required final int count, final bool large = false}) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Text(
     '$count ${count == 1 ? 'tap' : 'taps'}',
@@ -1247,12 +1159,7 @@ class _CountLabel extends StatelessWidget {
   );
 }
 
-class _Rule extends StatelessWidget {
-  const _Rule(this.number, this.title, this.detail);
-  final String number;
-  final String title;
-  final String detail;
-
+class const _Rule(final String number, final String title, final String detail) extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Padding(
     padding: const EdgeInsets.only(bottom: 20),

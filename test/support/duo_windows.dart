@@ -1,8 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:duo_rail_kit/duo_rail_kit.dart';
-import 'package:flutter/material.dart'; // ignore: deprecated_member_use, unnecessary_ignore
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_ui/material_ui.dart';
 
 /// One window: its size, the OS safe area, the native values, and the platform to theme.
 typedef DuoWindow = ({

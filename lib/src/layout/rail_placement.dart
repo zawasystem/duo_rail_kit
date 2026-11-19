@@ -16,9 +16,22 @@ import 'side_status_bar_insets.dart';
 /// Use the same placement and safe-area values for the rail and adjacent overlays, so that widths match and no spacing
 /// is left over when the rail is absent. [RailLayout] reads both together from one context. Values are logical pixels.
 @immutable
-class RailPlacement {
-  const RailPlacement({required this.edge, required this.followsSystemBar, this.statusBarHidden = false});
+class const RailPlacement({
+  /// The physical edge containing the rail.
+  required final HorizontalEdge edge,
 
+  /// Whether the rail follows the native vertical bar edge.
+  ///
+  /// A rail that follows it covers that edge's status column ([occupiedWidth]); a width-based rail sits left of the
+  /// body, after the left inset. Centred and tall bottom-aligned destinations need [centredRailSafeArea].
+  required final bool followsSystemBar,
+
+  /// Whether the system status bar is hidden, from [VerticalBarEdge.statusBarHiddenOf].
+  ///
+  /// Relevant only when [followsSystemBar] is true; false for width-based rails. Duo outer landscape keeps a status
+  /// column while it hides the status display.
+  final bool statusBarHidden = false,
+}) {
   /// Lower edge of the status display in the status column.
   ///
   /// One conservative value for every Duo screen (the inner display's ends near 98, the outer's near 151): the window
@@ -37,21 +50,6 @@ class RailPlacement {
   /// Flush with its edge, the rail is centred 48 from that edge, on the vertical bar's items ([VerticalBarRegion]) and
   /// the status display. [occupiedWidth] therefore takes 12 more than [statusColumnWidth] from the body.
   static const double systemRailWidth = 96;
-
-  /// The physical edge containing the rail.
-  final HorizontalEdge edge;
-
-  /// Whether the rail follows the native vertical bar edge.
-  ///
-  /// A rail that follows it covers that edge's status column ([occupiedWidth]); a width-based rail sits left of the
-  /// body, after the left inset. Centred and tall bottom-aligned destinations need [centredRailSafeArea].
-  final bool followsSystemBar;
-
-  /// Whether the system status bar is hidden, from [VerticalBarEdge.statusBarHiddenOf].
-  ///
-  /// Relevant only when [followsSystemBar] is true; false for width-based rails. Duo outer landscape keeps a status
-  /// column while it hides the status display.
-  final bool statusBarHidden;
 
   /// Selects the rail placement for [context], or null for bottom navigation.
   ///
