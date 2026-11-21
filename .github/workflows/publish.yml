@@ -14,18 +14,20 @@ concurrency:
 
 jobs:
   validate:
-    name: Release validation (format, analyze, test, dry run)
+    name: Release validation (Flutter ${{ matrix.flutter-version }})
     if: github.repository == 'zawasystem/duo_rail_kit'
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    strategy:
+      matrix:
+        flutter-version: ['3.50.0', '3.50.1']
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: subosito/flutter-action@1a449444c387b1966244ae4d4f8c696479add0b2 # v2.23.0
         with:
-          # Match the SDK in .fvmrc and the publish job.
-          flutter-version: 3.50.0
+          flutter-version: ${{ matrix.flutter-version }}
           channel: stable
           cache: true
       - run: flutter pub get
@@ -81,8 +83,8 @@ jobs:
         # tag's commit. Update them together. The SDK's first run and the
         # package's dependencies are set up here, before the token exists.
         env:
-          FLUTTER_TAG: 3.50.0
-          FLUTTER_COMMIT: ab2912035e160d9cad6306df307576da6128ebdb
+          FLUTTER_TAG: 3.50.1
+          FLUTTER_COMMIT: ae9b586f34a8443573f82ef57c3bf914a908cbf7
         run: |
           git -c advice.detachedHead=false clone --quiet --depth 1 --branch "$FLUTTER_TAG" https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
           if [ "$(git -C "$RUNNER_TEMP/flutter" rev-parse HEAD)" != "$FLUTTER_COMMIT" ]; then

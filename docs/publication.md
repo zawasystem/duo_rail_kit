@@ -23,10 +23,9 @@ and tags stay fixed: use a new version for later changes and never move a tag.
 - Align `pubspec.yaml`, the changelog, and the README's installation
   instructions; check the publishing account and package destination.
 - Run the [contributor checks](../CONTRIBUTING.md) against the Flutter
-  minimum in `pubspec.yaml` and the development version in `.fvmrc`. Both
-  currently use 3.50.0, so one SDK run covers both. When the versions diverge,
-  include both in CI and release validation. Verify installation from public
-  SDK distributions.
+  minimum in `pubspec.yaml` and the development version in `.fvmrc`.
+  CI and release validation cover Flutter 3.50.0 and 3.50.1.
+  Verify installation from public SDK distributions.
 - Build the iOS example (CocoaPods is not provided) and the Android example,
   and check ordinary phone and tablet layouts.
 - On a Simulator or device, check the Duo orientations, both Split View sides,

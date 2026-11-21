@@ -7,8 +7,8 @@ the maintenance rules. Contributions are made under the [MIT License](LICENSE).
 ## Checks
 
 Work in a Git checkout to use `.fvmrc`, `tool/` and the workflows. The
-development SDK in `.fvmrc` and the minimum in `pubspec.yaml` are both Flutter
-3.50.0 (Dart 3.14.0). From the package root:
+development SDK in `.fvmrc` is Flutter 3.50.1. The minimum in `pubspec.yaml`
+is Flutter 3.50.0. Both use Dart 3.14.0. From the package root:
 
 ```sh
 fvm flutter pub get
@@ -33,13 +33,13 @@ View and the status display on a Simulator or device.
 ## CI
 
 - [`ci.yml`](https://github.com/zawasystem/duo_rail_kit/blob/main/.github/workflows/ci.yml)
-  checks the package and the example on Ubuntu with Flutter 3.50.0.
+  checks the package and the example on Ubuntu with Flutter 3.50.0 and 3.50.1.
   Its `native_ios` job runs the host build on a GitHub-hosted macOS runner only
   when dispatched from `main` with `native_ios`; it fails without the iOS 27.1
   SDK.
 - [`publish.yml`](https://github.com/zawasystem/duo_rail_kit/blob/main/.github/workflows/publish.yml)
   runs on stable version tags. `validate` checks both packages and the
-  publication dry run on Flutter 3.50.0 without an OIDC token, then
+  publication dry run on both SDKs without an OIDC token, then
   `publish` holds `id-token: write` and runs first-party steps only (checkout,
   tag check, the Flutter SDK at its reviewed commit, `dart-lang/setup-dart`,
   `flutter pub publish --force`). An optional pub.dev environment requirement
